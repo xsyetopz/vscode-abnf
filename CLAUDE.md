@@ -17,7 +17,7 @@ No test suite exists yet. Verify changes by building and testing manually in VS 
 
 ## Project Structure
 
-```
+```text
 client/src/
   main.ts              # Extension entry point, provider registration
   tokenizer.ts         # Lexer -- converts text to tokens
@@ -57,9 +57,14 @@ snippets/
 
 ### Parser Flow
 
-```
-Text -> tokenize() -> Token[] -> parse() -> EbnfDocument
-                                         -> buildSymbolTable() -> SymbolTable
+```mermaid
+graph TD
+  A[Text] --> B[tokenize()]
+  B --> C[Token[]]
+  C --> D[parse()]
+  D --> E[EbnfDocument]
+  E --> F[buildSymbolTable()]
+  F --> G[SymbolTable]
 ```
 
 ### DocumentManager
@@ -73,6 +78,7 @@ const { document, symbolTable } = manager.get(doc);
 ### Cross-file Features
 
 Use `WorkspaceIndex` for workspace-wide operations:
+
 - `findDefinitions(name)` -- find rule in any file
 - `searchSymbols(query)` -- fuzzy search all rules
 - `getAllFiles()` -- iterate all indexed files
@@ -89,7 +95,7 @@ Use `WorkspaceIndex` for workspace-wide operations:
 
 Conventional commits with scope:
 
-```
+```text
 feat(providers): add semantic tokens
 fix(parser): handle empty rules
 docs(readme): update feature list
@@ -99,11 +105,13 @@ refactor(parser): extract parseRuleBody helper
 ## Configuration
 
 Settings defined in `package.json` under `contributes.configuration`:
+
 - `ebnf.diagnostics.enable` -- toggle all diagnostics
 - `ebnf.diagnostics.unusedRules` -- toggle unused rule hints
 - `ebnf.parser.spacedIdentifiers` -- ISO 14977 spaced identifiers
 
 Read settings via:
+
 ```typescript
 const config = workspace.getConfiguration("ebnf");
 const value = config.get<boolean>("diagnostics.enable", true);
