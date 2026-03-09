@@ -5,6 +5,8 @@ import {
 	workspace,
 } from "vscode";
 import { DocumentManager } from "./document-manager";
+import { WorkspaceIndex } from "./workspace-index";
+import { EbnfCodeActionProvider } from "./providers/code-actions";
 import { EbnfCompletionProvider } from "./providers/completion";
 import { EbnfDefinitionProvider } from "./providers/definition";
 import { updateDiagnostics } from "./providers/diagnostics";
@@ -13,24 +15,33 @@ import { EbnfDocumentHighlightProvider } from "./providers/highlighting";
 import { EbnfHoverProvider } from "./providers/hover";
 import { EbnfReferenceProvider } from "./providers/references";
 import { EbnfRenameProvider } from "./providers/rename";
+import { EbnfSemanticTokensProvider, SEMANTIC_TOKENS_LEGEND } from "./providers/semantic-tokens";
 import { EbnfDocumentSymbolProvider } from "./providers/symbols";
+import { EbnfWorkspaceSymbolProvider } from "./providers/workspace-symbols";
 
 const SELECTOR = { language: "ebnf" };
 
-export function activate(context: ExtensionContext): void {
+export async function activate(context: ExtensionContext): Promise<void> {
 	const manager = new DocumentManager();
+	const workspaceIndex = new WorkspaceIndex();
+	await workspaceIndex.initialize();
+
 	const diagnosticCollection = languages.createDiagnosticCollection("ebnf");
 
 	context.subscriptions.push(
 		manager,
+		workspaceIndex,
 		languages.registerDocumentSymbolProvider(SELECTOR, new EbnfDocumentSymbolProvider(manager)),
-		languages.registerDefinitionProvider(SELECTOR, new EbnfDefinitionProvider(manager)),
-		languages.registerReferenceProvider(SELECTOR, new EbnfReferenceProvider(manager)),
+		languages.registerDefinitionProvider(SELECTOR, new EbnfDefinitionProvider(manager, workspaceIndex)),
+		languages.registerReferenceProvider(SELECTOR, new EbnfReferenceProvider(manager, workspaceIndex)),
 		languages.registerHoverProvider(SELECTOR, new EbnfHoverProvider(manager)),
 		languages.registerCompletionItemProvider(SELECTOR, new EbnfCompletionProvider(manager)),
 		languages.registerRenameProvider(SELECTOR, new EbnfRenameProvider(manager)),
 		languages.registerDocumentHighlightProvider(SELECTOR, new EbnfDocumentHighlightProvider(manager)),
 		languages.registerFoldingRangeProvider(SELECTOR, new EbnfFoldingRangeProvider(manager)),
+		languages.registerCodeActionsProvider(SELECTOR, new EbnfCodeActionProvider(), EbnfCodeActionProvider.metadata),
+		languages.registerDocumentSemanticTokensProvider(SELECTOR, new EbnfSemanticTokensProvider(manager), SEMANTIC_TOKENS_LEGEND),
+		languages.registerWorkspaceSymbolProvider(new EbnfWorkspaceSymbolProvider(workspaceIndex)),
 		diagnosticCollection,
 	);
 
