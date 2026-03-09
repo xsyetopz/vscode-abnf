@@ -5,10 +5,61 @@ import type { EbnfDocument, IdentifierReference, Rule, SymbolTable } from "./typ
 
 export const DIAGNOSTIC_SOURCE = "ebnf";
 
+interface BracketEntry {
+	kind: TokenKind;
+	token: Token;
+}
+
+const BRACKET_OPEN_KINDS = new Set([
+	TokenKind.ParenOpen,
+	TokenKind.BracketOpen,
+	TokenKind.BraceOpen,
+]);
+
+const BRACKET_CLOSE_KINDS = new Set([
+	TokenKind.ParenClose,
+	TokenKind.BracketClose,
+	TokenKind.BraceClose,
+]);
+
+const BRACKET_PAIRS: Record<number, TokenKind> = {
+	[TokenKind.ParenOpen]: TokenKind.ParenClose,
+	[TokenKind.BracketOpen]: TokenKind.BracketClose,
+	[TokenKind.BraceOpen]: TokenKind.BraceClose,
+};
+
+const BRACKET_NAMES: Record<number, string> = {
+	[TokenKind.ParenOpen]: "(",
+	[TokenKind.ParenClose]: ")",
+	[TokenKind.BracketOpen]: "[",
+	[TokenKind.BracketClose]: "]",
+	[TokenKind.BraceOpen]: "{",
+	[TokenKind.BraceClose]: "}",
+};
+
+function expectedClosingName(openKind: TokenKind): string {
+	const closeKind = BRACKET_PAIRS[openKind];
+	return closeKind !== undefined ? BRACKET_NAMES[closeKind] ?? "?" : "?";
+}
+
+function openKindForClose(closeKind: TokenKind): TokenKind | undefined {
+	for (const [open, close] of Object.entries(BRACKET_PAIRS)) {
+		if (close === closeKind) {
+			return Number(open) as TokenKind;
+		}
+	}
+	return undefined;
+}
+
 export function parse(text: string): EbnfDocument {
-	const tokens = tokenize(text);
+	const { tokens, diagnostics: tokenDiagnostics } = tokenize(text);
 	const rules: Rule[] = [];
-	const diagnostics: Diagnostic[] = [];
+	const diagnostics: Diagnostic[] = tokenDiagnostics.map((d) => ({
+		message: d.message,
+		range: d.range,
+		severity: DiagnosticSeverity.Error,
+		source: DIAGNOSTIC_SOURCE,
+	}));
 
 	let tokenIndex = 0;
 	const tokenCount = tokens.length;
@@ -54,6 +105,8 @@ export function parse(text: string): EbnfDocument {
 			tokenIndex++;
 
 			let bodyToken = nextNonWhitespace();
+			const bracketStack: BracketEntry[] = [];
+
 			while (bodyToken && bodyToken.kind !== TokenKind.Semicolon) {
 				if (bodyToken.kind !== TokenKind.Comment) {
 					bodyTokens.push(bodyToken);
@@ -61,17 +114,55 @@ export function parse(text: string): EbnfDocument {
 				if (bodyToken.kind === TokenKind.Identifier) {
 					references.push({ name: bodyToken.text, range: bodyToken.range });
 				}
+
+				if (BRACKET_OPEN_KINDS.has(bodyToken.kind)) {
+					bracketStack.push({ kind: bodyToken.kind, token: bodyToken });
+				} else if (BRACKET_CLOSE_KINDS.has(bodyToken.kind)) {
+					const expectedOpen = openKindForClose(bodyToken.kind);
+					if (bracketStack.length === 0) {
+						diagnostics.push({
+							message: `Unexpected "${BRACKET_NAMES[bodyToken.kind]}" without matching opening bracket`,
+							range: bodyToken.range,
+							severity: DiagnosticSeverity.Error,
+							source: DIAGNOSTIC_SOURCE,
+						});
+					} else {
+						const top = bracketStack[bracketStack.length - 1]!;
+						if (expectedOpen === top.kind) {
+							bracketStack.pop();
+						} else {
+							diagnostics.push({
+								message: `Mismatched bracket: expected "${expectedClosingName(top.kind)}" but found "${BRACKET_NAMES[bodyToken.kind]}"`,
+								range: bodyToken.range,
+								severity: DiagnosticSeverity.Error,
+								source: DIAGNOSTIC_SOURCE,
+							});
+							bracketStack.pop();
+						}
+					}
+				}
+
 				tokenIndex++;
 				bodyToken = nextNonWhitespace();
+			}
+
+			for (const unclosed of bracketStack) {
+				diagnostics.push({
+					message: `Unclosed "${BRACKET_NAMES[unclosed.kind]}" \u2014 missing "${expectedClosingName(unclosed.kind)}"`,
+					range: unclosed.token.range,
+					severity: DiagnosticSeverity.Error,
+					source: DIAGNOSTIC_SOURCE,
+				});
 			}
 
 			const semicolonToken = bodyToken?.kind === TokenKind.Semicolon ? bodyToken : undefined;
 			if (semicolonToken) {
 				tokenIndex++;
 			} else {
+				const lastBodyToken = bodyTokens.length > 0 ? bodyTokens[bodyTokens.length - 1] : undefined;
 				diagnostics.push({
-					message: `Missing ";" at end of rule "${nameToken.text}"`,
-					range: nameToken.range,
+					message: `Missing terminator (";" or ".") at end of rule "${nameToken.text}"`,
+					range: lastBodyToken?.range ?? nameToken.range,
 					severity: DiagnosticSeverity.Error,
 					source: DIAGNOSTIC_SOURCE,
 				});
