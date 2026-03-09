@@ -16,7 +16,7 @@ bun run package    # Create installable .vsix file
 
 ## Directory Layout
 
-```
+```text
 client/src/           # TypeScript source code
   main.ts             # Entry point -- registers all providers
   tokenizer.ts        # Converts text to tokens (lexer)
@@ -79,6 +79,7 @@ interface SymbolTable {
 1. Create file in `client/src/providers/`
 2. Implement VS Code's provider interface
 3. Register in `main.ts`:
+
    ```typescript
    languages.registerXxxProvider(SELECTOR, new YourProvider(manager))
    ```
@@ -86,6 +87,7 @@ interface SymbolTable {
 ### New Diagnostic
 
 Add to `client/src/providers/diagnostics.ts`:
+
 ```typescript
 diagnostics.push({
   message: "Your message",
@@ -99,6 +101,7 @@ diagnostics.push({
 
 1. Add to `package.json` under `contributes.configuration.properties`
 2. Read in code:
+
    ```typescript
    workspace.getConfiguration("ebnf").get<boolean>("yourSetting", defaultValue)
    ```
@@ -115,7 +118,8 @@ diagnostics.push({
 ## Commit Messages
 
 Use conventional commits:
-```
+
+```tex
 feat(scope): add feature
 fix(scope): fix bug
 docs(scope): update docs
@@ -155,6 +159,7 @@ const matches = workspaceIndex.searchSymbols(query);
 ## Testing
 
 No automated tests exist yet. Test manually:
+
 1. Run `bun run build`
 2. Press F5 in VS Code to launch Extension Development Host
 3. Open a `.ebnf` file and verify features work
