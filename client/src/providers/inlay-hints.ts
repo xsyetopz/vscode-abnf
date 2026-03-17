@@ -25,7 +25,7 @@ function buildHintParts(
 		symbolTable.references.get(rule.name.toLowerCase())?.length ?? 0;
 
 	if (showRefCount) {
-		parts.push(`${refCount} ref${refCount !== 1 ? "s" : ""}`);
+		parts.push(`${refCount} ref${refCount === 1 ? "" : "s"}`);
 	}
 
 	if (showRecursion) {
