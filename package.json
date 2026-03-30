@@ -3,7 +3,7 @@
   "type": "module",
   "displayName": "ABNF Syntax Highlighting and Intellisense",
   "description": "ABNF (RFC 5234) grammar support with syntax highlighting, go-to definition, hover, completions, diagnostics, formatting, and more",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "xsyetopz"
   },
@@ -129,6 +129,41 @@
           ],
           "description": "How to indent alternatives on continuation lines."
         },
+        "abnf.formatting.blankLinesBetweenRules": {
+          "type": "number",
+          "default": 1,
+          "description": "Number of blank lines between consecutive rule definitions."
+        },
+        "abnf.formatting.breakAlternatives": {
+          "type": "string",
+          "enum": [
+            "always",
+            "auto",
+            "never"
+          ],
+          "default": "always",
+          "enumDescriptions": [
+            "Always put top-level / alternatives on their own lines",
+            "Inline if it fits under maxLineLength, otherwise break",
+            "Never force / alternatives onto new lines"
+          ],
+          "description": "How to format top-level / alternatives."
+        },
+        "abnf.formatting.maxLineLength": {
+          "type": "number",
+          "default": 80,
+          "description": "Wrap long rule bodies to this many columns. Set to 0 to disable wrapping."
+        },
+        "abnf.formatting.preserveContinuationLineBreaks": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preserve existing continuation line breaks (newlines followed by leading whitespace) when formatting."
+        },
+        "abnf.formatting.spaceBeforeInlineComment": {
+          "type": "number",
+          "default": 2,
+          "description": "Spaces before inline ; comments in rule bodies."
+        },
         "abnf.formatting.insertFinalNewline": {
           "type": "boolean",
           "default": true,
@@ -158,11 +193,12 @@
     "biome:format": "bunx biome format . --write --max-diagnostics 16384",
     "biome:lint": "bunx biome lint . --write --max-diagnostics 16384",
     "package": "bun run build && vsce package",
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "vscode:prepublish": "bun run build"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.8",
+    "@biomejs/biome": "^2.4.9",
     "@types/bun": "^1.3.11",
     "@types/node": "^25.5.0",
     "@types/vscode": "^1.75.0",

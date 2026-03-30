@@ -101,50 +101,55 @@ rule = element1 / element2
 
 ### Diagnostics
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `abnf.diagnostics.enable` | `true` | Enable or disable all diagnostics |
-| `abnf.diagnostics.unusedRules` | `true` | Show hints for unused rules |
-| `abnf.diagnostics.undefinedReferences` | `true` | Show errors for undefined rule references |
+| Setting                                | Default | Description                               |
+| -------------------------------------- | ------- | ----------------------------------------- |
+| `abnf.diagnostics.enable`              | `true`  | Enable or disable all diagnostics         |
+| `abnf.diagnostics.unusedRules`         | `true`  | Show hints for unused rules               |
+| `abnf.diagnostics.undefinedReferences` | `true`  | Show errors for undefined rule references |
 
 ### Formatting
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `abnf.formatting.alignEquals` | `true` | Align `=` signs across consecutive rules |
-| `abnf.formatting.continuationIndent` | `4` | Spaces for continuation lines |
-| `abnf.formatting.alternativeIndent` | `"align"` | `"align"` alternatives under `=`, or `"indent"` with fixed indent |
-| `abnf.formatting.insertFinalNewline` | `true` | Insert final newline at end of file |
+| Setting                                          | Default    | Description                                                                                                                                   |
+| ------------------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abnf.formatting.alignEquals`                    | `true`     | Align `=` signs across consecutive rules                                                                                                      |
+| `abnf.formatting.continuationIndent`             | `4`        | Spaces for continuation lines                                                                                                                 |
+| `abnf.formatting.alternativeIndent`              | `"align"`  | `"align"` alternatives under `=`, or `"indent"` with fixed indent                                                                             |
+| `abnf.formatting.blankLinesBetweenRules`         | `1`        | Blank lines between consecutive rule definitions                                                                                              |
+| `abnf.formatting.breakAlternatives`              | `"always"` | `"always"` breaks top-level `/` alternatives onto new lines, `"auto"` inlines if it fits under max line length, `"never"` never forces breaks |
+| `abnf.formatting.maxLineLength`                  | `80`       | Wrap long rule bodies to this many columns (`0` disables wrapping)                                                                            |
+| `abnf.formatting.preserveContinuationLineBreaks` | `false`    | Preserve existing continuation line breaks (newlines followed by leading whitespace)                                                          |
+| `abnf.formatting.spaceBeforeInlineComment`       | `2`        | Spaces before inline `;` comments in rule bodies                                                                                              |
+| `abnf.formatting.insertFinalNewline`             | `true`     | Insert final newline at end of file                                                                                                           |
 
 ### Inlay Hints
 
-| Setting | Default | Description |
-|---------|---------|-------------|
+| Setting                          | Default | Description                           |
+| -------------------------------- | ------- | ------------------------------------- |
 | `abnf.inlayHints.referenceCount` | `false` | Show reference count after rule names |
-| `abnf.inlayHints.recursion` | `false` | Mark directly recursive rules |
-| `abnf.inlayHints.unusedMarker` | `false` | Mark unused rules inline |
+| `abnf.inlayHints.recursion`      | `false` | Mark directly recursive rules         |
+| `abnf.inlayHints.unusedMarker`   | `false` | Mark unused rules inline              |
 
 ## ABNF Quick Reference
 
-| Syntax | Meaning |
-|--------|---------|
-| `=` | Rule definition |
-| `=/` | Incremental alternative (extends existing rule) |
-| `/` | Alternative (or) |
-| `( ... )` | Grouping |
-| `[ ... ]` | Optional (zero or one) |
-| `*element` | Repetition (zero or more) |
-| `1*element` | Repetition (one or more) |
-| `3*5element` | Repetition (3 to 5 times) |
-| `3element` | Repetition (exactly 3) |
-| `"..."` | Case-insensitive string |
-| `%s"..."` | Case-sensitive string (RFC 7405) |
-| `%x41` | Hex value (character A) |
-| `%x30-39` | Value range (digits 0-9) |
-| `%x48.65.6C.6C.6F` | Value concatenation ("Hello") |
-| `%d` / `%b` | Decimal / binary values |
-| `<...>` | Prose value (natural language) |
-| `;` | Comment (to end of line) |
+| Syntax             | Meaning                                         |
+| ------------------ | ----------------------------------------------- |
+| `=`                | Rule definition                                 |
+| `=/`               | Incremental alternative (extends existing rule) |
+| `/`                | Alternative (or)                                |
+| `( ... )`          | Grouping                                        |
+| `[ ... ]`          | Optional (zero or one)                          |
+| `*element`         | Repetition (zero or more)                       |
+| `1*element`        | Repetition (one or more)                        |
+| `3*5element`       | Repetition (3 to 5 times)                       |
+| `3element`         | Repetition (exactly 3)                          |
+| `"..."`            | Case-insensitive string                         |
+| `%s"..."`          | Case-sensitive string (RFC 7405)                |
+| `%x41`             | Hex value (character A)                         |
+| `%x30-39`          | Value range (digits 0-9)                        |
+| `%x48.65.6C.6C.6F` | Value concatenation ("Hello")                   |
+| `%d` / `%b`        | Decimal / binary values                         |
+| `<...>`            | Prose value (natural language)                  |
+| `;`                | Comment (to end of line)                        |
 
 ## Development
 

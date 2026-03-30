@@ -28,7 +28,9 @@
         "sourceMap": true,
         "strict": true,
         "target": "ES2022",
+        "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
         "types": [
+            "bun",
             "node",
             "vscode"
         ]
