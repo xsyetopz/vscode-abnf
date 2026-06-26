@@ -115,7 +115,7 @@ function buildRuleFromTokens(
 	);
 	if (!hasContent) {
 		diagnostics.push({
-			message: `Rule "${ruleNameToken.text}" has an empty body`,
+			message: `Rule "${ruleNameToken.text}" has no expression after "="`,
 			range: tokenRange(ruleNameToken),
 			severity: DiagnosticSeverity.Warning,
 			source: DIAGNOSTIC_SOURCE,
@@ -342,7 +342,7 @@ class ExpressionParser {
 		const closing = this.#peek();
 		if (!closing || closing.kind !== AbnfTokenKind.ParenClose) {
 			this.diagnostics.push({
-				message: `Unterminated group "(" - missing ")"`,
+				message: `Group opened with "(" has no closing ")"`,
 				range: tokenRange(openToken),
 				severity: DiagnosticSeverity.Error,
 				source: DIAGNOSTIC_SOURCE,
@@ -358,7 +358,7 @@ class ExpressionParser {
 		const closing = this.#peek();
 		if (!closing || closing.kind !== AbnfTokenKind.BracketClose) {
 			this.diagnostics.push({
-				message: `Unterminated optional "[" - missing "]"`,
+				message: `Optional group opened with "[" has no closing "]"`,
 				range: tokenRange(openToken),
 				severity: DiagnosticSeverity.Error,
 				source: DIAGNOSTIC_SOURCE,
@@ -498,7 +498,7 @@ function parseRuleAt(
 			assignToken.kind !== AbnfTokenKind.IncrementalAs)
 	) {
 		diagnostics.push({
-			message: `Expected "=" or "=/" after rule name "${ruleNameToken.text}"`,
+			message: `Rule "${ruleNameToken.text}" needs "=" or "=/" before the expression`,
 			range: tokenRange(ruleNameToken),
 			severity: DiagnosticSeverity.Error,
 			source: DIAGNOSTIC_SOURCE,

@@ -4,21 +4,21 @@
     "body": [
       "[${1:1}] ${2:name} ::= ${3:expression}"
     ],
-    "description": "W3C XML EBNF production"
+    "description": "Insert a W3C XML EBNF production with a number."
   },
   "Character code": {
     "prefix": "hex",
     "body": [
       "#x${1:20}"
     ],
-    "description": "W3C XML EBNF character code"
+    "description": "Insert a W3C XML EBNF hexadecimal character code."
   },
   "Character range": {
     "prefix": "range",
     "body": [
       "[#x${1:20}-#x${2:7E}]"
     ],
-    "description": "W3C XML EBNF character range"
+    "description": "Insert a W3C XML EBNF character range."
   },
   "Alternatives": {
     "prefix": "alt",
@@ -26,6 +26,6 @@
       "${1:name} ::= ${2:first}",
       "    | ${3:second}"
     ],
-    "description": "W3C XML EBNF alternatives"
+    "description": "Insert a W3C XML EBNF production with two alternatives."
   }
 }

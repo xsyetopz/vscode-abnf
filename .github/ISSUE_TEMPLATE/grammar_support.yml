@@ -1,0 +1,42 @@
+name: Grammar support
+description: Request a parsing, highlighting, formatting, or diagnostic change for a grammar notation.
+title: "grammar: "
+labels:
+  - grammar
+body:
+  - type: dropdown
+    id: grammar
+    attributes:
+      label: Grammar
+      options:
+        - ABNF
+        - BNF
+        - W3C XML EBNF
+        - RBNF
+        - Markdown code fence
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source or standard
+      description: Link the spec section or project convention that defines the syntax.
+      placeholder: https://...
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Grammar sample
+      description: Paste the smallest grammar sample that should work.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected support
+      description: Should the sample parse, highlight, format, or produce a diagnostic?
+    validations:
+      required: true

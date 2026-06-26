@@ -93,7 +93,7 @@ function coreRuleCompletions(
 	return Array.from(CORE_RULES.values(), (rule) => {
 		const item = new CompletionItem(rule.name, CompletionItemKind.Constant);
 		item.detail = `${rule.name} = ${rule.definitionText}`;
-		item.documentation = "Core rule (RFC 5234 Appendix B)";
+		item.documentation = "Built-in ABNF core rule from RFC 5234 Appendix B.";
 		return item;
 	});
 }
@@ -133,12 +133,12 @@ function dialectSnippetCompletions(
 				snippet(
 					"case-sensitive string",
 					`%s"${placeholder("1:text")}"`,
-					"RFC 7405 string",
+					"RFC 7405 case-sensitive string",
 				),
 				snippet(
 					"case-insensitive string",
 					`%i"${placeholder("1:text")}"`,
-					"RFC 7405 string",
+					"RFC 7405 case-insensitive string",
 				),
 				snippet(
 					"repetition",

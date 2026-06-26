@@ -5,8 +5,8 @@ import {
 	type InlayHintsProvider,
 	type Range,
 	type TextDocument,
-	workspace,
 } from "vscode";
+import { readGrammarConfig } from "../config.ts";
 import { normalizeSymbolName } from "../grammar.ts";
 import { getSyntaxDetailInlays } from "../syntax-details.ts";
 import type { GrammarWorkspace } from "../workspace.ts";
@@ -28,18 +28,20 @@ export class GrammarInlayHintsProvider implements InlayHintsProvider {
 	): InlayHint[] {
 		const { dialect, document, symbolTable } = this.#grammarWorkspace.get(doc);
 		const hints: InlayHint[] = [];
-		const bnfConfig = workspace.getConfiguration("bnf");
-		const abnfConfig = workspace.getConfiguration("abnf");
-		const readConfig = <T>(key: string, fallback: T): T =>
-			bnfConfig.get<T>(key) ?? abnfConfig.get<T>(key, fallback);
 
-		const showRefCount = readConfig<boolean>(
+		const showRefCount = readGrammarConfig<boolean>(
 			"inlayHints.referenceCount",
 			false,
 		);
-		const showRecursion = readConfig<boolean>("inlayHints.recursion", false);
-		const showUnused = readConfig<boolean>("inlayHints.unusedMarker", false);
-		const showSyntaxDetails = readConfig<boolean>(
+		const showRecursion = readGrammarConfig<boolean>(
+			"inlayHints.recursion",
+			false,
+		);
+		const showUnused = readGrammarConfig<boolean>(
+			"inlayHints.unusedMarker",
+			false,
+		);
+		const showSyntaxDetails = readGrammarConfig<boolean>(
 			"inlayHints.syntaxDetails",
 			false,
 		);

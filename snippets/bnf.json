@@ -4,7 +4,7 @@
     "body": [
       "${1:rule-name} ::= ${2:expression}"
     ],
-    "description": "BNF/EBNF/RBNF rule definition"
+    "description": "Insert a BNF rule with ::=."
   },
   "Alternative": {
     "prefix": "alt",
@@ -12,27 +12,27 @@
       "${1:rule-name} ::= ${2:first}",
       "    | ${3:second}"
     ],
-    "description": "Alternative production"
+    "description": "Insert a BNF rule with two alternatives."
   },
   "Optional": {
     "prefix": "opt",
     "body": [
       "[${1:expression}]"
     ],
-    "description": "Optional expression"
+    "description": "Insert an optional BNF expression."
   },
   "Group": {
     "prefix": "group",
     "body": [
       "(${1:expression})"
     ],
-    "description": "Grouped expression"
+    "description": "Insert a grouped BNF expression."
   },
   "RBNF angle rule": {
     "prefix": "angle",
     "body": [
       "<${1:rule name}> ::= ${2:expression}"
     ],
-    "description": "RBNF angle-bracket rule"
+    "description": "Insert a rule name inside angle brackets."
   }
 }

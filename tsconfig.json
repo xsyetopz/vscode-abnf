@@ -13,7 +13,7 @@
     ],
     "module": "commonjs",
     "moduleDetection": "force",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -34,7 +34,6 @@
       "node",
       "vscode"
     ],
-    "ignoreDeprecations": "6.0"
   },
   "exclude": [
     "node_modules",

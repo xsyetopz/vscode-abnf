@@ -3,27 +3,29 @@ import type { Range } from "vscode";
 /**
  * Token categories emitted by the ABNF lexer.
  */
-export enum AbnfTokenKind {
-	Rulename = 0,
-	DefinedAs = 1,
-	IncrementalAs = 2,
-	Alternation = 3,
-	String = 4,
-	CaseSensitiveString = 5,
-	CaseInsensitiveString = 6,
-	NumericValue = 7,
-	ProseValue = 8,
-	Comment = 9,
-	ParenOpen = 10,
-	ParenClose = 11,
-	BracketOpen = 12,
-	BracketClose = 13,
-	Integer = 14,
-	Asterisk = 15,
-	Whitespace = 16,
-	Newline = 17,
-	Unknown = 18,
-}
+export const AbnfTokenKind = {
+	Rulename: 0,
+	DefinedAs: 1,
+	IncrementalAs: 2,
+	Alternation: 3,
+	String: 4,
+	CaseSensitiveString: 5,
+	CaseInsensitiveString: 6,
+	NumericValue: 7,
+	ProseValue: 8,
+	Comment: 9,
+	ParenOpen: 10,
+	ParenClose: 11,
+	BracketOpen: 12,
+	BracketClose: 13,
+	Integer: 14,
+	Asterisk: 15,
+	Whitespace: 16,
+	Newline: 17,
+	Unknown: 18,
+} as const;
+
+export type AbnfTokenKind = (typeof AbnfTokenKind)[keyof typeof AbnfTokenKind];
 
 /**
  * Source token with text and single-line position metadata.

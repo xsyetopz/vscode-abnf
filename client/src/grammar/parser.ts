@@ -173,7 +173,7 @@ function syntaxDiagnostic(
 		!line.text.includes("::=")
 	) {
 		return {
-			message: `W3C XML EBNF requires '::='. ${ISO_14977_NON_SUPPORT}`,
+			message: `Use "::=" for W3C XML EBNF productions. ${ISO_14977_NON_SUPPORT}`,
 			range: makeSingleLineRange(line.line, 0, line.text.length),
 			severity: DiagnosticSeverity.Warning,
 			source: dialect,
@@ -284,7 +284,7 @@ function delimiterDiagnostics(
 						bodyStartOffset,
 						i,
 						1,
-						`Unmatched '${ch}' delimiter`,
+						`Closing delimiter "${ch}" has no matching opener`,
 						dialect,
 					),
 				);
@@ -298,7 +298,7 @@ function delimiterDiagnostics(
 				bodyStartOffset,
 				open.index,
 				1,
-				`Unclosed '${open.ch}' delimiter`,
+				`Opening delimiter "${open.ch}" has no matching closer`,
 				dialect,
 			),
 		);
@@ -324,7 +324,7 @@ function emptyBodyDiagnostic(
 	dialect: ProductionDialect,
 ): Diagnostic {
 	return {
-		message: `Rule "${name}" has an empty body`,
+		message: `Rule "${name}" has no expression after "::="`,
 		range,
 		severity: DiagnosticSeverity.Warning,
 		source: dialect,
@@ -339,8 +339,7 @@ function rbnfNameDiagnostic(
 		return undefined;
 	}
 	return {
-		message:
-			"RBNF rule names must be one angle-bracket identifier on a single line",
+		message: 'RBNF rule names must stay inside one "<...>" pair on one line',
 		range,
 		severity: DiagnosticSeverity.Error,
 		source: "rbnf",

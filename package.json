@@ -2,8 +2,8 @@
   "name": "vscode-bnf-intellisense",
   "type": "module",
   "displayName": "BNF-family Syntax Highlighting and Intellisense",
-  "description": "BNF, EBNF, ABNF, and RBNF grammar support with syntax highlighting, navigation, diagnostics, formatting, and more",
-  "version": "0.1.0",
+  "description": "Edit ABNF, BNF, W3C XML EBNF, and RBNF files with highlighting, navigation, diagnostics, formatting, and snippets.",
+  "version": "0.2.0",
   "author": {
     "name": "xsyetopz"
   },
@@ -40,7 +40,7 @@
   "categories": [
     "Programming Languages"
   ],
-  "icon": "logo.png",
+  "icon": "assets/logo.png",
   "galleryBanner": {
     "color": "#0d1b2a",
     "theme": "dark"
@@ -62,8 +62,8 @@
         ],
         "configuration": "bnf-language-configuration.json",
         "icon": {
-          "light": "logo.png",
-          "dark": "logo.png"
+          "light": "assets/logo.png",
+          "dark": "assets/logo.png"
         }
       },
       {
@@ -77,8 +77,8 @@
         ],
         "configuration": "bnf-language-configuration.json",
         "icon": {
-          "light": "logo.png",
-          "dark": "logo.png"
+          "light": "assets/logo.png",
+          "dark": "assets/logo.png"
         }
       },
       {
@@ -92,8 +92,8 @@
         ],
         "configuration": "bnf-language-configuration.json",
         "icon": {
-          "light": "logo.png",
-          "dark": "logo.png"
+          "light": "assets/logo.png",
+          "dark": "assets/logo.png"
         }
       },
       {
@@ -107,8 +107,8 @@
         ],
         "configuration": "bnf-language-configuration.json",
         "icon": {
-          "light": "logo.png",
-          "dark": "logo.png"
+          "light": "assets/logo.png",
+          "dark": "assets/logo.png"
         }
       }
     ],
@@ -198,27 +198,27 @@
         "bnf.diagnostics.enable": {
           "type": "boolean",
           "default": true,
-          "description": "Enable/disable diagnostics for grammar files."
+          "description": "Show parser and rule diagnostics for ABNF, BNF, EBNF, and RBNF files."
         },
         "bnf.diagnostics.unusedRules": {
           "type": "boolean",
           "default": true,
-          "description": "Report rules that are defined but never referenced (as hints)."
+          "description": "Show a hint when a rule is not referenced by another rule."
         },
         "bnf.diagnostics.undefinedReferences": {
           "type": "boolean",
           "default": true,
-          "description": "Report references to undefined rules."
+          "description": "Show an error when a rule reference has no definition in the file."
         },
         "bnf.formatting.alignEquals": {
           "type": "boolean",
           "default": true,
-          "description": "Align = signs across consecutive rule definitions."
+          "description": "Align assignment operators across consecutive rule definitions."
         },
         "bnf.formatting.continuationIndent": {
           "type": "number",
           "default": 4,
-          "description": "Number of spaces for continuation lines."
+          "description": "Number of spaces to indent wrapped rule-body lines."
         },
         "bnf.formatting.alternativeIndent": {
           "type": "string",
@@ -228,15 +228,15 @@
           ],
           "default": "align",
           "enumDescriptions": [
-            "Align / under the first element after =",
-            "Use fixed continuation indent"
+            "Align alternatives under the first expression item",
+            "Indent alternatives by bnf.formatting.continuationIndent spaces"
           ],
-          "description": "How to indent alternatives on continuation lines."
+          "description": "Choose how formatter indents alternatives on continuation lines."
         },
         "bnf.formatting.blankLinesBetweenRules": {
           "type": "number",
           "default": 1,
-          "description": "Number of blank lines between consecutive rule definitions."
+          "description": "Number of blank lines the formatter keeps between rule definitions."
         },
         "bnf.formatting.breakAlternatives": {
           "type": "string",
@@ -247,174 +247,87 @@
           ],
           "default": "always",
           "enumDescriptions": [
-            "Always put top-level / alternatives on their own lines",
-            "Inline if it fits under maxLineLength, otherwise break",
-            "Never force / alternatives onto new lines"
+            "Put each top-level alternative on its own line",
+            "Keep alternatives inline when the line fits bnf.formatting.maxLineLength",
+            "Do not split alternatives only because they are alternatives"
           ],
-          "description": "How to format top-level / alternatives."
+          "description": "Choose when formatter breaks top-level alternatives onto separate lines."
         },
         "bnf.formatting.maxLineLength": {
           "type": "number",
           "default": 80,
-          "description": "Wrap long rule bodies to this many columns. Set to 0 to disable wrapping."
+          "description": "Wrap rule bodies after this column. Use 0 to disable wrapping."
         },
         "bnf.formatting.alignProductionNumbers": {
           "type": "boolean",
           "default": true,
-          "description": "Align optional EBNF production numbers with rule names when formatting."
+          "description": "Align EBNF production numbers, such as [1], with rule names."
         },
         "bnf.formatting.preserveCommentSpacing": {
           "type": "boolean",
           "default": true,
-          "description": "Preserve standalone comment block spacing when formatting grammar files."
+          "description": "Keep blank-line spacing around standalone comments when formatting."
         },
         "bnf.formatting.trimTrailingBlankLines": {
           "type": "boolean",
           "default": true,
-          "description": "Trim trailing blank lines before final newline handling."
+          "description": "Remove extra blank lines at the end of the file before final-newline handling."
         },
         "bnf.formatting.preserveContinuationLineBreaks": {
           "type": "boolean",
           "default": false,
-          "description": "Preserve existing continuation line breaks (newlines followed by leading whitespace) when formatting."
+          "description": "Keep existing indented continuation line breaks instead of reflowing them."
         },
         "bnf.formatting.spaceBeforeInlineComment": {
           "type": "number",
           "default": 2,
-          "description": "Spaces before inline ; comments in rule bodies."
+          "description": "Number of spaces before inline semicolon comments in rule bodies."
         },
         "bnf.formatting.insertFinalNewline": {
           "type": "boolean",
           "default": true,
-          "description": "Insert a final newline at end of file."
+          "description": "End formatted files with one final newline."
         },
         "bnf.inlayHints.referenceCount": {
           "type": "boolean",
           "default": false,
-          "description": "Show reference count after rule names."
+          "description": "Show an inlay hint with the number of references after each rule name."
         },
         "bnf.inlayHints.recursion": {
           "type": "boolean",
           "default": false,
-          "description": "Mark directly recursive rules."
+          "description": "Show an inlay hint on rules that reference themselves directly."
         },
         "bnf.inlayHints.unusedMarker": {
           "type": "boolean",
           "default": false,
-          "description": "Mark unused rules inline (in addition to diagnostic)."
+          "description": "Show an inlay hint on rules with no references."
         },
         "bnf.inlayHints.syntaxDetails": {
           "type": "boolean",
           "default": false,
-          "description": "Show lightweight inline syntax detail markers for repetitions and terminals."
+          "description": "Show inlay hints for syntax details such as repetitions and terminals."
         },
-        "abnf.diagnostics.enable": {
-          "type": "boolean",
-          "default": true,
-          "description": "(Legacy ABNF alias) Enable/disable diagnostics for ABNF files."
-        },
-        "abnf.diagnostics.unusedRules": {
-          "type": "boolean",
-          "default": true,
-          "description": "(Legacy ABNF alias) Report rules that are defined but never referenced (as hints)."
-        },
-        "abnf.diagnostics.undefinedReferences": {
-          "type": "boolean",
-          "default": true,
-          "description": "(Legacy ABNF alias) Report references to undefined rules."
-        },
-        "abnf.formatting.alignEquals": {
-          "type": "boolean",
-          "default": true,
-          "description": "(Legacy ABNF alias) Align = signs across consecutive rule definitions."
-        },
-        "abnf.formatting.continuationIndent": {
-          "type": "number",
-          "default": 4,
-          "description": "(Legacy ABNF alias) Number of spaces for continuation lines."
-        },
-        "abnf.formatting.alternativeIndent": {
+        "bnf.semanticHighlighting.mode": {
           "type": "string",
           "enum": [
-            "align",
-            "indent"
-          ],
-          "default": "align",
-          "enumDescriptions": [
-            "Align / under the first element after =",
-            "Use fixed continuation indent"
-          ],
-          "description": "(Legacy ABNF alias) How to indent alternatives on continuation lines."
-        },
-        "abnf.formatting.blankLinesBetweenRules": {
-          "type": "number",
-          "default": 1,
-          "description": "(Legacy ABNF alias) Number of blank lines between consecutive rule definitions."
-        },
-        "abnf.formatting.breakAlternatives": {
-          "type": "string",
-          "enum": [
-            "always",
             "auto",
-            "never"
+            "on",
+            "off"
           ],
-          "default": "always",
+          "default": "auto",
           "enumDescriptions": [
-            "Always put top-level / alternatives on their own lines",
-            "Inline if it fits under maxLineLength, otherwise break",
-            "Never force / alternatives onto new lines"
+            "Use semantic tokens until the file exceeds bnf.semanticHighlighting.maxTokens",
+            "Always use semantic tokens",
+            "Use TextMate grammar highlighting only"
           ],
-          "description": "(Legacy ABNF alias) How to format top-level / alternatives."
+          "description": "Choose whether grammar files use semantic highlighting."
         },
-        "abnf.formatting.maxLineLength": {
+        "bnf.semanticHighlighting.maxTokens": {
           "type": "number",
-          "default": 80,
-          "description": "(Legacy ABNF alias) Wrap long rule bodies to this many columns. Set to 0 to disable wrapping."
-        },
-        "abnf.formatting.preserveCommentSpacing": {
-          "type": "boolean",
-          "default": true,
-          "description": "(Legacy ABNF alias) Preserve standalone comment block spacing when formatting grammar files."
-        },
-        "abnf.formatting.trimTrailingBlankLines": {
-          "type": "boolean",
-          "default": true,
-          "description": "(Legacy ABNF alias) Trim trailing blank lines before final newline handling."
-        },
-        "abnf.formatting.preserveContinuationLineBreaks": {
-          "type": "boolean",
-          "default": false,
-          "description": "(Legacy ABNF alias) Preserve existing continuation line breaks (newlines followed by leading whitespace) when formatting."
-        },
-        "abnf.formatting.spaceBeforeInlineComment": {
-          "type": "number",
-          "default": 2,
-          "description": "(Legacy ABNF alias) Spaces before inline ; comments in rule bodies."
-        },
-        "abnf.formatting.insertFinalNewline": {
-          "type": "boolean",
-          "default": true,
-          "description": "(Legacy ABNF alias) Insert a final newline at end of file."
-        },
-        "abnf.inlayHints.referenceCount": {
-          "type": "boolean",
-          "default": false,
-          "description": "(Legacy ABNF alias) Show reference count after rule names."
-        },
-        "abnf.inlayHints.recursion": {
-          "type": "boolean",
-          "default": false,
-          "description": "(Legacy ABNF alias) Mark directly recursive rules."
-        },
-        "abnf.inlayHints.unusedMarker": {
-          "type": "boolean",
-          "default": false,
-          "description": "(Legacy ABNF alias) Mark unused rules inline (in addition to diagnostic)."
-        },
-        "abnf.inlayHints.syntaxDetails": {
-          "type": "boolean",
-          "default": false,
-          "description": "(Legacy ABNF alias) Show lightweight inline syntax detail markers for repetitions and terminals."
+          "default": 20000,
+          "minimum": 0,
+          "description": "Maximum semantic tokens in auto mode before TextMate fallback. Use 0 for no limit."
         }
       }
     }
@@ -424,17 +337,18 @@
     "biome:check": "bunx biome check . --write --unsafe --max-diagnostics 16384",
     "biome:format": "bunx biome format . --write --max-diagnostics 16384",
     "biome:lint": "bunx biome lint . --write --max-diagnostics 16384",
+    "hooks:install": "git config core.hooksPath .githooks",
     "package": "bun run build && vsce package",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "vscode:prepublish": "bun run build"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.12",
-    "@types/bun": "^1.3.13",
-    "@types/node": "^25.6.0",
+    "@biomejs/biome": "^2.5.1",
+    "@types/bun": "^1.3.14",
+    "@types/node": "^26.0.1",
     "@types/vscode": "^1.75.0",
-    "@vscode/vsce": "^3.9.1",
+    "@vscode/vsce": "^3.9.2",
     "typescript": "^6.0.3"
   },
   "trustedDependencies": [

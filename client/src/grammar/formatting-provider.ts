@@ -5,14 +5,14 @@ import {
 	Range,
 	type TextDocument,
 	TextEdit,
-	workspace,
 } from "vscode";
 import {
 	type AbnfAlternativeIndent,
 	type AbnfBreakAlternatives,
 	type AbnfFormatterConfig,
 	formatAbnfDocument,
-} from "../abnf-format.ts";
+} from "../abnf/format.ts";
+import { readGrammarConfig } from "./config.ts";
 import {
 	formatProductionGrammarDocument,
 	type GenericGrammarFormatterConfig,
@@ -48,52 +48,48 @@ export class GrammarFormattingProvider
 	}
 }
 
-function readConfig<T>(key: string, fallback: T): T {
-	return (
-		workspace.getConfiguration("bnf").get<T>(key) ??
-		workspace.getConfiguration("abnf").get<T>(key, fallback)
-	);
-}
-
 function readFormattingConfig(): AbnfFormatterConfig &
 	GenericGrammarFormatterConfig {
 	return {
-		alignEquals: readConfig<boolean>("formatting.alignEquals", true),
-		continuationIndent: readConfig<number>("formatting.continuationIndent", 4),
-		alternativeIndent: readConfig<AbnfAlternativeIndent>(
+		alignEquals: readGrammarConfig<boolean>("formatting.alignEquals", true),
+		continuationIndent: readGrammarConfig<number>(
+			"formatting.continuationIndent",
+			4,
+		),
+		alternativeIndent: readGrammarConfig<AbnfAlternativeIndent>(
 			"formatting.alternativeIndent",
 			"align",
 		),
-		insertFinalNewline: readConfig<boolean>(
+		insertFinalNewline: readGrammarConfig<boolean>(
 			"formatting.insertFinalNewline",
 			true,
 		),
-		blankLinesBetweenRules: readConfig<number>(
+		blankLinesBetweenRules: readGrammarConfig<number>(
 			"formatting.blankLinesBetweenRules",
 			1,
 		),
-		breakAlternatives: readConfig<AbnfBreakAlternatives>(
+		breakAlternatives: readGrammarConfig<AbnfBreakAlternatives>(
 			"formatting.breakAlternatives",
 			"always",
 		),
-		maxLineLength: readConfig<number>("formatting.maxLineLength", 80),
-		preserveContinuationLineBreaks: readConfig<boolean>(
+		maxLineLength: readGrammarConfig<number>("formatting.maxLineLength", 80),
+		preserveContinuationLineBreaks: readGrammarConfig<boolean>(
 			"formatting.preserveContinuationLineBreaks",
 			false,
 		),
-		spaceBeforeInlineComment: readConfig<number>(
+		spaceBeforeInlineComment: readGrammarConfig<number>(
 			"formatting.spaceBeforeInlineComment",
 			2,
 		),
-		alignProductionNumbers: readConfig<boolean>(
+		alignProductionNumbers: readGrammarConfig<boolean>(
 			"formatting.alignProductionNumbers",
 			true,
 		),
-		preserveCommentSpacing: readConfig<boolean>(
+		preserveCommentSpacing: readGrammarConfig<boolean>(
 			"formatting.preserveCommentSpacing",
 			true,
 		),
-		trimTrailingBlankLines: readConfig<boolean>(
+		trimTrailingBlankLines: readGrammarConfig<boolean>(
 			"formatting.trimTrailingBlankLines",
 			true,
 		),

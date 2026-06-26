@@ -3,11 +3,11 @@ import {
 	type DiagnosticCollection,
 	DiagnosticSeverity,
 	type TextDocument,
-	workspace,
 } from "vscode";
 import { CORE_RULE_NAMES } from "../abnf/core-rules.ts";
 import { tokenize } from "../abnf/tokenizer.ts";
 import { AbnfTokenKind } from "../abnf/types.ts";
+import { readGrammarConfig } from "./config.ts";
 import { type GrammarDialect, normalizeSymbolName } from "./grammar.ts";
 import type { GrammarWorkspace } from "./workspace.ts";
 
@@ -16,19 +16,11 @@ const DEFAULT_DIAGNOSTIC_SOURCE = "bnf";
 type ManagerResult = ReturnType<GrammarWorkspace["get"]>;
 
 function getConfigValue<T>(
-	dialect: GrammarDialect,
+	_dialect: GrammarDialect,
 	key: string,
 	fallback: T,
 ): T {
-	const modern = workspace.getConfiguration("bnf");
-	const value = modern.get<T>(key);
-	if (value !== undefined) {
-		return value;
-	}
-	if (dialect === "abnf") {
-		return workspace.getConfiguration("abnf").get<T>(key, fallback);
-	}
-	return fallback;
+	return readGrammarConfig<T>(key, fallback);
 }
 
 function collectIncrementalRuleNames(text: string): Set<string> {
@@ -69,7 +61,7 @@ function checkUndefinedReferences(result: ManagerResult): Diagnostic[] {
 				)
 			) {
 				diagnostics.push({
-					message: `"${ref.name}" is not defined as a rule in this file`,
+					message: `Rule reference "${ref.name}" has no definition in this file`,
 					range: ref.range,
 					severity: DiagnosticSeverity.Error,
 					source: result.dialect,
@@ -96,7 +88,7 @@ function checkUnusedRules(result: ManagerResult): Diagnostic[] {
 		if (!hasReferences) {
 			for (const rule of rules) {
 				diagnostics.push({
-					message: `Rule '${rule.name}' is defined but never referenced`,
+					message: `Rule "${rule.name}" is not referenced by another rule`,
 					range: rule.nameRange,
 					severity: DiagnosticSeverity.Hint,
 					source: result.dialect,
@@ -123,7 +115,7 @@ function checkDuplicateDefinitions(
 		}
 		for (const rule of rules) {
 			diagnostics.push({
-				message: `Duplicate definition of rule "${rule.name}"`,
+				message: `Rule "${rule.name}" has more than one definition`,
 				range: rule.nameRange,
 				severity: DiagnosticSeverity.Warning,
 				source: result.dialect,

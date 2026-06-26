@@ -73,8 +73,8 @@ export class GrammarHoverProvider implements HoverProvider {
 			`References: ${refCount}`,
 		];
 		if (coreRule) {
-			parts.push("Built-in ABNF core rule.");
-			parts.push("Not user-defined. Create/rename actions do not apply.");
+			parts.push("Built-in ABNF core rule from RFC 5234 Appendix B.");
+			parts.push("Create and rename actions do not apply to built-in rules.");
 		}
 
 		const fence = "```";

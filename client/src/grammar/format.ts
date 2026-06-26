@@ -1,7 +1,7 @@
 import type {
 	AbnfAlternativeIndent,
 	AbnfBreakAlternatives,
-} from "../abnf-format.ts";
+} from "../abnf/format.ts";
 import type { GrammarDialect } from "./dialects.ts";
 
 /**

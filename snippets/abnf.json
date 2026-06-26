@@ -4,62 +4,62 @@
     "body": [
       "${1:name} = $0"
     ],
-    "description": "ABNF rule definition"
+    "description": "Insert an ABNF rule with =."
   },
   "Alternation": {
     "prefix": "alt",
     "body": [
       "${1:name} = ${2:option1} / $0"
     ],
-    "description": "Rule with alternatives"
+    "description": "Insert an ABNF rule with / alternatives."
   },
   "Optional": {
     "prefix": "opt",
     "body": [
       "[$0]"
     ],
-    "description": "Optional group [ ... ]"
+    "description": "Insert an optional ABNF group."
   },
   "Repetition": {
     "prefix": "rep",
     "body": [
       "*($0)"
     ],
-    "description": "Zero or more repetition *( ... )"
+    "description": "Insert a zero-or-more ABNF repetition."
   },
   "One or more": {
     "prefix": "rep1",
     "body": [
       "1*($0)"
     ],
-    "description": "One or more repetition 1*( ... )"
+    "description": "Insert a one-or-more ABNF repetition."
   },
   "Bounded repetition": {
     "prefix": "repn",
     "body": [
       "${1:min}*${2:max}($0)"
     ],
-    "description": "Bounded repetition min*max( ... )"
+    "description": "Insert an ABNF repetition with minimum and maximum counts."
   },
   "Hex value": {
     "prefix": "hex",
     "body": [
       "%x$0"
     ],
-    "description": "Hexadecimal value %xNN"
+    "description": "Insert an ABNF hexadecimal terminal."
   },
   "Hex range": {
     "prefix": "range",
     "body": [
       "%x${1:start}-${2:end}"
     ],
-    "description": "Hexadecimal range %xNN-NN"
+    "description": "Insert an ABNF hexadecimal range."
   },
   "Incremental alternative": {
     "prefix": "inc",
     "body": [
       "${1:name} =/ $0"
     ],
-    "description": "Incremental alternative rule =/ ..."
+    "description": "Insert an ABNF incremental alternative with =/."
   }
 }

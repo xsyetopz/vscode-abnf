@@ -33,7 +33,7 @@ export class GrammarCodeActionProvider implements CodeActionProvider {
 			if (undefinedMatch) {
 				return [createRuleAction(doc, diagnostic, undefinedMatch[1] ?? "")];
 			}
-			if (diagnostic.message.includes("W3C XML EBNF requires '::='")) {
+			if (diagnostic.message.includes('Use "::=" for W3C XML EBNF')) {
 				return [replaceIsoAssignmentAction(doc, diagnostic)];
 			}
 			return [];
@@ -42,7 +42,7 @@ export class GrammarCodeActionProvider implements CodeActionProvider {
 	}
 }
 
-const UNDEFINED_RULE_RE = /"([^"]+)" is not defined/;
+const UNDEFINED_RULE_RE = /Rule reference "([^"]+)" has no definition/;
 const ISO_ASSIGNMENT_RE = /(^|\s)=/;
 
 function createRuleAction(
@@ -51,7 +51,7 @@ function createRuleAction(
 	name: string,
 ): CodeAction {
 	const action = new CodeAction(
-		`Create rule '${name}'`,
+		`Create missing rule "${name}"`,
 		CodeActionKind.QuickFix,
 	);
 	const edit = new WorkspaceEdit();
@@ -73,7 +73,7 @@ function replaceIsoAssignmentAction(
 	diagnostic: CodeActionContext["diagnostics"][number],
 ): CodeAction {
 	const action = new CodeAction(
-		"Replace '=' with '::='",
+		'Use "::=" for this EBNF production',
 		CodeActionKind.QuickFix,
 	);
 	const edit = new WorkspaceEdit();

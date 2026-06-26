@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions
+    url: https://github.com/xsyetopz/vscode-bnf-intellisense/issues
+    about: Ask usage or grammar-support questions in issues.

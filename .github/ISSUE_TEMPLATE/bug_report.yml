@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a broken editor feature, diagnostic, formatter result, or grammar parse.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What happened?
+      placeholder: The formatter removes...
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Minimal grammar input
+      description: Paste the smallest ABNF, BNF, EBNF, or RBNF file that shows the bug.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: grammar
+    attributes:
+      label: Grammar
+      options:
+        - ABNF
+        - BNF
+        - EBNF
+        - RBNF
+        - Markdown code fence
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: What should VS Code show or do?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: What did VS Code show or do instead?
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: VS Code version and extension version.
+      placeholder: "VS Code 1.xx, extension 0.x"

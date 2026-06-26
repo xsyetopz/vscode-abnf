@@ -15,7 +15,7 @@ export interface GrammarStandardDefinition {
  * Explanation shown when ISO 14977 EBNF syntax is detected.
  */
 export const ISO_14977_NON_SUPPORT =
-	"ISO/IEC 14977 EBNF is intentionally unsupported; this extension targets W3C XML EBNF. See https://dwheeler.com/essays/dont-use-iso-14977-ebnf.html";
+	"ISO/IEC 14977 EBNF is not supported; use W3C XML EBNF instead. See https://dwheeler.com/essays/dont-use-iso-14977-ebnf.html";
 
 /**
  * Registry of supported grammar standards and examples.

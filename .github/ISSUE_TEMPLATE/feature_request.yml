@@ -1,0 +1,44 @@
+name: Feature request
+description: Request an editor feature, setting, command, or workflow change.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Need
+      description: What editing task should become easier?
+      placeholder: I want to...
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Proposed behavior
+      description: What should the extension do?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Highlighting
+        - Diagnostics
+        - Formatting
+        - Completion
+        - Navigation
+        - Rename or references
+        - Inlay hints
+        - Snippets
+        - Settings
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Example grammar
+      description: Add a short grammar sample if the request depends on syntax.
+      render: text

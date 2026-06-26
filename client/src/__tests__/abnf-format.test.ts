@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
 	type AbnfFormatterConfig,
 	formatAbnfDocument,
-} from "../abnf-format.ts";
+} from "../abnf/format.ts";
 
 const RULE_DEFINITION_RE = /^[A-Za-z][A-Za-z0-9-]*\s*=\/?/;
 

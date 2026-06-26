@@ -71,8 +71,10 @@ describe("grammar diagnostics", () => {
 		expect(messages.some((message) => message.includes("hexadecimal"))).toBe(
 			true,
 		);
-		expect(messages.some((message) => message.includes("Unclosed '('"))).toBe(
-			true,
-		);
+		expect(
+			messages.some((message) =>
+				message.includes('Opening delimiter "(" has no matching closer'),
+			),
+		).toBe(true);
 	});
 });
