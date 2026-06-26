@@ -156,7 +156,15 @@ All settings use the `bnf.*` prefix.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=xsyetopz/vscode-bnf-intellisense&type=Date)](https://www.star-history.com/#xsyetopz/vscode-bnf-intellisense&Date)
+## Star History
+
+<a href="https://www.star-history.com/?type=date&repos=xsyetopz%2Fvscode-bnf-intellisense">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=xsyetopz/vscode-bnf-intellisense&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=xsyetopz/vscode-bnf-intellisense&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=xsyetopz/vscode-bnf-intellisense&type=date&legend=top-left" />
+ </picture>
+</a>
 
 ## License
 
