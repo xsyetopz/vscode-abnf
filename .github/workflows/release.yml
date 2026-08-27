@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing release tag (for example, v1.2.3) to package and release
+        description: Release tag (for example, v1.2.3) to package and release
         required: true
         type: string
 
@@ -25,12 +25,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
         with:
-          ref: refs/tags/${{ env.RELEASE_TAG }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.ref }}
+          token: ${{ github.token }}
           fetch-depth: 0
 
       - name: Verify release tag
-        env:
-          RELEASE_TAG: ${{ env.RELEASE_TAG }}
         run: |
           set -euo pipefail
 
@@ -47,16 +46,26 @@ jobs:
             exit 1
           fi
 
-          if ! git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"; then
-            echo "Release tag does not exist: $RELEASE_TAG" >&2
-            exit 1
+          checked_out_commit="$(git rev-parse --verify HEAD)"
+          tag_ref="refs/tags/$RELEASE_TAG"
+
+          if git show-ref --verify --quiet "$tag_ref"; then
+            tag_commit="$(git rev-list --max-count=1 "$tag_ref")"
+            if [[ "$tag_commit" != "$checked_out_commit" ]]; then
+              echo "Local release tag does not match checked out commit: $RELEASE_TAG" >&2
+              exit 1
+            fi
           fi
 
-          tag_commit="$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")"
-          checked_out_commit="$(git rev-parse HEAD)"
-          if [[ "$tag_commit" != "$checked_out_commit" ]]; then
-            echo "Checked out commit does not match release tag: $RELEASE_TAG" >&2
-            exit 1
+          if git ls-remote --exit-code --refs origin "$tag_ref" >/dev/null; then
+            remote_probe="refs/release-check/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            git fetch --no-tags origin "$tag_ref:$remote_probe"
+            remote_tag_commit="$(git rev-list --max-count=1 "$remote_probe")"
+            git update-ref -d "$remote_probe"
+            if [[ "$remote_tag_commit" != "$checked_out_commit" ]]; then
+              echo "Remote release tag does not match checked out commit: $RELEASE_TAG" >&2
+              exit 1
+            fi
           fi
 
       - name: Set up Bun
@@ -85,6 +94,91 @@ jobs:
           name: vscode-bnf-intellisense-vsix
           path: "*.vsix"
           if-no-files-found: error
+
+      - name: Ensure release tag
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          checked_out_commit="$(git rev-parse --verify HEAD)"
+          tag_ref="refs/tags/$RELEASE_TAG"
+
+          verify_local_tag() {
+            local tag_commit
+            tag_commit="$(git rev-list --max-count=1 "$tag_ref")"
+            if [[ "$tag_commit" != "$checked_out_commit" ]]; then
+              echo "Local release tag does not match checked out commit: $RELEASE_TAG" >&2
+              exit 1
+            fi
+          }
+
+          remote_tag_commit() {
+            if git ls-remote --exit-code --refs origin "$tag_ref" >/dev/null; then
+              :
+            else
+              local status=$?
+              if [[ "$status" -eq 2 ]]; then
+                return 2
+              fi
+              return "$status"
+            fi
+
+            local remote_probe="refs/release-check/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            git fetch --no-tags origin "$tag_ref:$remote_probe"
+            git rev-list --max-count=1 "$remote_probe"
+            git update-ref -d "$remote_probe"
+          }
+
+          verify_remote_tag() {
+            local remote_commit="$1"
+            if [[ "$remote_commit" != "$checked_out_commit" ]]; then
+              echo "Remote release tag does not match checked out commit: $RELEASE_TAG" >&2
+              exit 1
+            fi
+          }
+
+          local_tag_exists=false
+          if git show-ref --verify --quiet "$tag_ref"; then
+            verify_local_tag
+            local_tag_exists=true
+          fi
+
+          remote_tag_exists=false
+          if remote_commit="$(remote_tag_commit)"; then
+            verify_remote_tag "$remote_commit"
+            remote_tag_exists=true
+          else
+            status=$?
+            if [[ "$status" -ne 2 ]]; then
+              echo "Unable to determine whether remote release tag exists: $RELEASE_TAG" >&2
+              exit "$status"
+            fi
+          fi
+
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            if [[ "$remote_tag_exists" != true ]]; then
+              echo "Pushed release tag is missing remotely: $RELEASE_TAG" >&2
+              exit 1
+            fi
+            echo "Verified pushed release tag; no tag creation attempted."
+          elif [[ "$remote_tag_exists" != true ]]; then
+            if [[ "$local_tag_exists" != true ]]; then
+              git tag "$RELEASE_TAG" "$checked_out_commit"
+            fi
+
+            # actions/checkout persisted github.token for this authenticated push.
+            if ! git push origin "$tag_ref"; then
+              if remote_commit="$(remote_tag_commit)"; then
+                verify_remote_tag "$remote_commit"
+                echo "Release tag was created concurrently at the validated commit."
+              else
+                status=$?
+                echo "Unable to safely create release tag: $RELEASE_TAG" >&2
+                exit "$status"
+              fi
+            fi
+          fi
 
       - name: Create GitHub release
         env:
