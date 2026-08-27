@@ -5,534 +5,534 @@ import { AbnfTokenKind } from "./types.ts";
 type BodyAtom = { kind: "token"; tok: AbnfToken } | { kind: "hardBreak" };
 
 function isContinuationNewline(
-	bodyTokens: AbnfToken[],
-	newlineIndex: number,
+  bodyTokens: AbnfToken[],
+  newlineIndex: number,
 ): boolean {
-	const next = bodyTokens[newlineIndex + 1];
-	return (
-		next !== undefined &&
-		next.kind === AbnfTokenKind.Whitespace &&
-		next.column === 0
-	);
+  const next = bodyTokens[newlineIndex + 1];
+  return (
+    next !== undefined &&
+    next.kind === AbnfTokenKind.Whitespace &&
+    next.column === 0
+  );
 }
 
 function buildBodyAtoms(
-	bodyTokens: AbnfToken[],
-	config: AbnfFormatterConfig,
+  bodyTokens: AbnfToken[],
+  config: AbnfFormatterConfig,
 ): BodyAtom[] {
-	const atoms: BodyAtom[] = [];
+  const atoms: BodyAtom[] = [];
 
-	for (let i = 0; i < bodyTokens.length; i++) {
-		const tok = bodyTokens[i];
-		if (tok === undefined) {
-			continue;
-		}
+  for (let i = 0; i < bodyTokens.length; i++) {
+    const tok = bodyTokens[i];
+    if (tok === undefined) {
+      continue;
+    }
 
-		if (tok.kind === AbnfTokenKind.Whitespace) {
-			continue;
-		}
+    if (tok.kind === AbnfTokenKind.Whitespace) {
+      continue;
+    }
 
-		if (tok.kind === AbnfTokenKind.Newline) {
-			if (
-				config.preserveContinuationLineBreaks &&
-				isContinuationNewline(bodyTokens, i)
-			) {
-				atoms.push({ kind: "hardBreak" });
-			}
-			continue;
-		}
+    if (tok.kind === AbnfTokenKind.Newline) {
+      if (
+        config.preserveContinuationLineBreaks &&
+        isContinuationNewline(bodyTokens, i)
+      ) {
+        atoms.push({ kind: "hardBreak" });
+      }
+      continue;
+    }
 
-		if (tok.kind === AbnfTokenKind.Comment) {
-			atoms.push({ kind: "token", tok });
-			// ABNF comments end the line; if more tokens follow, they must start on a continuation line.
-			atoms.push({ kind: "hardBreak" });
-			continue;
-		}
+    if (tok.kind === AbnfTokenKind.Comment) {
+      atoms.push({ kind: "token", tok });
+      // ABNF comments end the line; if more tokens follow, they must start on a continuation line.
+      atoms.push({ kind: "hardBreak" });
+      continue;
+    }
 
-		atoms.push({ kind: "token", tok });
-	}
+    atoms.push({ kind: "token", tok });
+  }
 
-	while (atoms.length > 0 && atoms[atoms.length - 1]?.kind === "hardBreak") {
-		atoms.pop();
-	}
+  while (atoms.length > 0 && atoms[atoms.length - 1]?.kind === "hardBreak") {
+    atoms.pop();
+  }
 
-	return atoms;
+  return atoms;
 }
 
 function containsHardBreak(atoms: BodyAtom[]): boolean {
-	return atoms.some((a) => a.kind === "hardBreak");
+  return atoms.some((a) => a.kind === "hardBreak");
 }
 
 function containsComment(atoms: BodyAtom[]): boolean {
-	return atoms.some(
-		(a) => a.kind === "token" && a.tok.kind === AbnfTokenKind.Comment,
-	);
+  return atoms.some(
+    (a) => a.kind === "token" && a.tok.kind === AbnfTokenKind.Comment,
+  );
 }
 
 function updateDepth(depth: number, tok: AbnfToken): number {
-	if (
-		tok.kind === AbnfTokenKind.ParenOpen ||
-		tok.kind === AbnfTokenKind.BracketOpen
-	) {
-		return depth + 1;
-	}
-	if (
-		tok.kind === AbnfTokenKind.ParenClose ||
-		tok.kind === AbnfTokenKind.BracketClose
-	) {
-		return depth - 1;
-	}
-	return depth;
+  if (
+    tok.kind === AbnfTokenKind.ParenOpen ||
+    tok.kind === AbnfTokenKind.BracketOpen
+  ) {
+    return depth + 1;
+  }
+  if (
+    tok.kind === AbnfTokenKind.ParenClose ||
+    tok.kind === AbnfTokenKind.BracketClose
+  ) {
+    return depth - 1;
+  }
+  return depth;
 }
 
 function estimateInlineBodyLength(atoms: BodyAtom[]): number {
-	let prev: AbnfToken | null = null;
-	let len = 0;
+  let prev: AbnfToken | null = null;
+  let len = 0;
 
-	for (const atom of atoms) {
-		if (atom.kind === "hardBreak") {
-			return Number.POSITIVE_INFINITY;
-		}
-		const tok = atom.tok;
-		if (tok.kind === AbnfTokenKind.Comment) {
-			return Number.POSITIVE_INFINITY;
-		}
-		if (prev && needsSpaceBetween(prev, tok)) {
-			len += 1;
-		}
-		len += tok.text.length;
-		prev = tok;
-	}
+  for (const atom of atoms) {
+    if (atom.kind === "hardBreak") {
+      return Number.POSITIVE_INFINITY;
+    }
+    const tok = atom.tok;
+    if (tok.kind === AbnfTokenKind.Comment) {
+      return Number.POSITIVE_INFINITY;
+    }
+    if (prev && needsSpaceBetween(prev, tok)) {
+      len += 1;
+    }
+    len += tok.text.length;
+    prev = tok;
+  }
 
-	return len;
+  return len;
 }
 
 function hasTopLevelAlternation(atoms: BodyAtom[]): boolean {
-	let depth = 0;
-	for (const atom of atoms) {
-		if (atom.kind === "hardBreak") {
-			continue;
-		}
-		const tok = atom.tok;
-		if (tok.kind === AbnfTokenKind.Alternation && depth === 0) {
-			return true;
-		}
-		depth = updateDepth(depth, tok);
-	}
-	return false;
+  let depth = 0;
+  for (const atom of atoms) {
+    if (atom.kind === "hardBreak") {
+      continue;
+    }
+    const tok = atom.tok;
+    if (tok.kind === AbnfTokenKind.Alternation && depth === 0) {
+      return true;
+    }
+    depth = updateDepth(depth, tok);
+  }
+  return false;
 }
 
 function computeEffectiveBreakAlternatives(
-	atoms: BodyAtom[],
-	config: AbnfFormatterConfig,
-	definitionPrefixLength: number,
+  atoms: BodyAtom[],
+  config: AbnfFormatterConfig,
+  definitionPrefixLength: number,
 ): boolean {
-	if (!hasTopLevelAlternation(atoms)) {
-		return false;
-	}
-	if (config.breakAlternatives === "always") {
-		return true;
-	}
-	if (config.breakAlternatives === "never") {
-		return false;
-	}
+  if (!hasTopLevelAlternation(atoms)) {
+    return false;
+  }
+  if (config.breakAlternatives === "always") {
+    return true;
+  }
+  if (config.breakAlternatives === "never") {
+    return false;
+  }
 
-	const maxLen = config.maxLineLength > 0 ? config.maxLineLength : 0;
-	if (maxLen <= 0) {
-		return true;
-	}
+  const maxLen = config.maxLineLength > 0 ? config.maxLineLength : 0;
+  if (maxLen <= 0) {
+    return true;
+  }
 
-	if (containsHardBreak(atoms) || containsComment(atoms)) {
-		return true;
-	}
+  if (containsHardBreak(atoms) || containsComment(atoms)) {
+    return true;
+  }
 
-	const estimated = estimateInlineBodyLength(atoms);
-	return definitionPrefixLength + estimated > maxLen;
+  const estimated = estimateInlineBodyLength(atoms);
+  return definitionPrefixLength + estimated > maxLen;
 }
 
 function splitAlternatives(
-	atoms: BodyAtom[],
-	multilineAlternatives: boolean,
+  atoms: BodyAtom[],
+  multilineAlternatives: boolean,
 ): BodyAtom[][] {
-	if (!multilineAlternatives) {
-		return [atoms];
-	}
+  if (!multilineAlternatives) {
+    return [atoms];
+  }
 
-	const alternatives: BodyAtom[][] = [];
-	let current: BodyAtom[] = [];
-	let depth = 0;
+  const alternatives: BodyAtom[][] = [];
+  let current: BodyAtom[] = [];
+  let depth = 0;
 
-	for (const atom of atoms) {
-		if (atom.kind === "hardBreak") {
-			current.push(atom);
-			continue;
-		}
+  for (const atom of atoms) {
+    if (atom.kind === "hardBreak") {
+      current.push(atom);
+      continue;
+    }
 
-		const tok = atom.tok;
-		if (tok.kind === AbnfTokenKind.Alternation && depth === 0) {
-			alternatives.push(current);
-			current = [];
-			continue;
-		}
+    const tok = atom.tok;
+    if (tok.kind === AbnfTokenKind.Alternation && depth === 0) {
+      alternatives.push(current);
+      current = [];
+      continue;
+    }
 
-		current.push(atom);
-		depth = updateDepth(depth, tok);
-	}
+    current.push(atom);
+    depth = updateDepth(depth, tok);
+  }
 
-	alternatives.push(current);
-	return alternatives;
+  alternatives.push(current);
+  return alternatives;
 }
 
 function splitHardBreakLines(atoms: BodyAtom[]): AbnfToken[][] {
-	const lines: AbnfToken[][] = [];
-	let current: AbnfToken[] = [];
+  const lines: AbnfToken[][] = [];
+  let current: AbnfToken[] = [];
 
-	for (const atom of atoms) {
-		if (atom.kind === "hardBreak") {
-			if (current.length > 0) {
-				lines.push(current);
-				current = [];
-			}
-			continue;
-		}
-		current.push(atom.tok);
-	}
+  for (const atom of atoms) {
+    if (atom.kind === "hardBreak") {
+      if (current.length > 0) {
+        lines.push(current);
+        current = [];
+      }
+      continue;
+    }
+    current.push(atom.tok);
+  }
 
-	if (current.length > 0) {
-		lines.push(current);
-	}
+  if (current.length > 0) {
+    lines.push(current);
+  }
 
-	return lines;
+  return lines;
 }
 
 function buildDefinitionPrefix(
-	rule: RuleBlock,
-	nameWidth: number,
-	config: AbnfFormatterConfig,
+  rule: RuleBlock,
+  nameWidth: number,
+  config: AbnfFormatterConfig,
 ): string {
-	const paddedName = config.alignEquals
-		? rule.name.padEnd(nameWidth)
-		: rule.name;
-	return `${paddedName} ${rule.operator} `;
+  const paddedName = config.alignEquals
+    ? rule.name.padEnd(nameWidth)
+    : rule.name;
+  return `${paddedName} ${rule.operator} `;
 }
 
 function computeRuleIndents(
-	definitionPrefix: string,
-	config: AbnfFormatterConfig,
+  definitionPrefix: string,
+  config: AbnfFormatterConfig,
 ): { bodyIndent: string; altContinuationIndent: string } {
-	const continuationIndent = " ".repeat(
-		Math.max(0, Math.floor(config.continuationIndent)),
-	);
+  const continuationIndent = " ".repeat(
+    Math.max(0, Math.floor(config.continuationIndent)),
+  );
 
-	const bodyIndent =
-		config.alternativeIndent === "align"
-			? " ".repeat(definitionPrefix.length)
-			: continuationIndent;
+  const bodyIndent =
+    config.alternativeIndent === "align"
+      ? " ".repeat(definitionPrefix.length)
+      : continuationIndent;
 
-	const altContinuationIndent =
-		config.alternativeIndent === "align"
-			? " ".repeat(bodyIndent.length + 2)
-			: continuationIndent;
+  const altContinuationIndent =
+    config.alternativeIndent === "align"
+      ? " ".repeat(bodyIndent.length + 2)
+      : continuationIndent;
 
-	return { bodyIndent, altContinuationIndent };
+  return { bodyIndent, altContinuationIndent };
 }
 
 function computeLinePrefixes(
-	definitionPrefix: string,
-	bodyIndent: string,
-	altContinuationIndent: string,
-	altIndex: number,
-	lineIndex: number,
+  definitionPrefix: string,
+  bodyIndent: string,
+  altContinuationIndent: string,
+  altIndex: number,
+  lineIndex: number,
 ): { firstPrefix: string; wrapPrefix: string } {
-	const isFirstAlt = altIndex === 0;
-	const isFirstLineInAlt = lineIndex === 0;
+  const isFirstAlt = altIndex === 0;
+  const isFirstLineInAlt = lineIndex === 0;
 
-	const firstPrefix = isFirstLineInAlt
-		? isFirstAlt
-			? definitionPrefix
-			: `${bodyIndent}/ `
-		: isFirstAlt
-			? bodyIndent
-			: altContinuationIndent;
+  const firstPrefix = isFirstLineInAlt
+    ? isFirstAlt
+      ? definitionPrefix
+      : `${bodyIndent}/ `
+    : isFirstAlt
+      ? bodyIndent
+      : altContinuationIndent;
 
-	const wrapPrefix = isFirstLineInAlt
-		? isFirstAlt
-			? bodyIndent
-			: altContinuationIndent
-		: firstPrefix;
+  const wrapPrefix = isFirstLineInAlt
+    ? isFirstAlt
+      ? bodyIndent
+      : altContinuationIndent
+    : firstPrefix;
 
-	return { firstPrefix, wrapPrefix };
+  return { firstPrefix, wrapPrefix };
 }
 
 function formatAlternativeLines(
-	logicalLines: AbnfToken[][],
-	config: AbnfFormatterConfig,
-	definitionPrefix: string,
-	bodyIndent: string,
-	altContinuationIndent: string,
-	altIndex: number,
+  logicalLines: AbnfToken[][],
+  config: AbnfFormatterConfig,
+  definitionPrefix: string,
+  bodyIndent: string,
+  altContinuationIndent: string,
+  altIndex: number,
 ): string[] {
-	const out: string[] = [];
+  const out: string[] = [];
 
-	for (let lineIndex = 0; lineIndex < logicalLines.length; lineIndex++) {
-		const lineTokens = logicalLines[lineIndex] ?? [];
-		if (lineTokens.length === 0) {
-			continue;
-		}
+  for (let lineIndex = 0; lineIndex < logicalLines.length; lineIndex++) {
+    const lineTokens = logicalLines[lineIndex] ?? [];
+    if (lineTokens.length === 0) {
+      continue;
+    }
 
-		const { firstPrefix, wrapPrefix } = computeLinePrefixes(
-			definitionPrefix,
-			bodyIndent,
-			altContinuationIndent,
-			altIndex,
-			lineIndex,
-		);
+    const { firstPrefix, wrapPrefix } = computeLinePrefixes(
+      definitionPrefix,
+      bodyIndent,
+      altContinuationIndent,
+      altIndex,
+      lineIndex,
+    );
 
-		out.push(
-			...renderTokensWrapped(lineTokens, config, firstPrefix, wrapPrefix),
-		);
-	}
+    out.push(
+      ...renderTokensWrapped(lineTokens, config, firstPrefix, wrapPrefix),
+    );
+  }
 
-	return out;
+  return out;
 }
 
 function formatRuleBodyLines(
-	atoms: BodyAtom[],
-	config: AbnfFormatterConfig,
-	definitionPrefix: string,
-	bodyIndent: string,
-	altContinuationIndent: string,
+  atoms: BodyAtom[],
+  config: AbnfFormatterConfig,
+  definitionPrefix: string,
+  bodyIndent: string,
+  altContinuationIndent: string,
 ): string[] {
-	const multilineAlternatives = computeEffectiveBreakAlternatives(
-		atoms,
-		config,
-		definitionPrefix.length,
-	);
-	const alternatives = splitAlternatives(atoms, multilineAlternatives);
+  const multilineAlternatives = computeEffectiveBreakAlternatives(
+    atoms,
+    config,
+    definitionPrefix.length,
+  );
+  const alternatives = splitAlternatives(atoms, multilineAlternatives);
 
-	const outLines: string[] = [];
+  const outLines: string[] = [];
 
-	for (let altIndex = 0; altIndex < alternatives.length; altIndex++) {
-		const altAtoms = alternatives[altIndex];
-		if (altAtoms === undefined) {
-			continue;
-		}
+  for (let altIndex = 0; altIndex < alternatives.length; altIndex++) {
+    const altAtoms = alternatives[altIndex];
+    if (altAtoms === undefined) {
+      continue;
+    }
 
-		const logicalLines = splitHardBreakLines(altAtoms);
-		if (logicalLines.length === 0) {
-			continue;
-		}
+    const logicalLines = splitHardBreakLines(altAtoms);
+    if (logicalLines.length === 0) {
+      continue;
+    }
 
-		outLines.push(
-			...formatAlternativeLines(
-				logicalLines,
-				config,
-				definitionPrefix,
-				bodyIndent,
-				altContinuationIndent,
-				altIndex,
-			),
-		);
-	}
+    outLines.push(
+      ...formatAlternativeLines(
+        logicalLines,
+        config,
+        definitionPrefix,
+        bodyIndent,
+        altContinuationIndent,
+        altIndex,
+      ),
+    );
+  }
 
-	return outLines;
+  return outLines;
 }
 
 export function formatRule(
-	rule: RuleBlock,
-	nameWidth: number,
-	config: AbnfFormatterConfig,
+  rule: RuleBlock,
+  nameWidth: number,
+  config: AbnfFormatterConfig,
 ): string {
-	const definitionPrefix = buildDefinitionPrefix(rule, nameWidth, config);
+  const definitionPrefix = buildDefinitionPrefix(rule, nameWidth, config);
 
-	const atoms = buildBodyAtoms(rule.bodyTokens, config);
-	if (atoms.length === 0) {
-		return definitionPrefix.trimEnd();
-	}
+  const atoms = buildBodyAtoms(rule.bodyTokens, config);
+  if (atoms.length === 0) {
+    return definitionPrefix.trimEnd();
+  }
 
-	const { bodyIndent, altContinuationIndent } = computeRuleIndents(
-		definitionPrefix,
-		config,
-	);
+  const { bodyIndent, altContinuationIndent } = computeRuleIndents(
+    definitionPrefix,
+    config,
+  );
 
-	return formatRuleBodyLines(
-		atoms,
-		config,
-		definitionPrefix,
-		bodyIndent,
-		altContinuationIndent,
-	).join("\n");
+  return formatRuleBodyLines(
+    atoms,
+    config,
+    definitionPrefix,
+    bodyIndent,
+    altContinuationIndent,
+  ).join("\n");
 }
 
 interface TokenRender {
-	tok: AbnfToken;
-	breakBefore: boolean;
+  tok: AbnfToken;
+  breakBefore: boolean;
 }
 
 function isRepetitionPrefix(tok: AbnfToken, prev: AbnfToken | null): boolean {
-	if (prev === null) {
-		return false;
-	}
-	if (
-		(prev.kind === AbnfTokenKind.Asterisk ||
-			prev.kind === AbnfTokenKind.Integer) &&
-		(tok.kind === AbnfTokenKind.Rulename ||
-			tok.kind === AbnfTokenKind.String ||
-			tok.kind === AbnfTokenKind.CaseSensitiveString ||
-			tok.kind === AbnfTokenKind.CaseInsensitiveString ||
-			tok.kind === AbnfTokenKind.NumericValue ||
-			tok.kind === AbnfTokenKind.ProseValue ||
-			tok.kind === AbnfTokenKind.ParenOpen ||
-			tok.kind === AbnfTokenKind.BracketOpen)
-	) {
-		return true;
-	}
-	if (
-		prev.kind === AbnfTokenKind.Integer &&
-		tok.kind === AbnfTokenKind.Asterisk
-	) {
-		return true;
-	}
-	if (
-		prev.kind === AbnfTokenKind.Asterisk &&
-		tok.kind === AbnfTokenKind.Integer
-	) {
-		return true;
-	}
-	return false;
+  if (prev === null) {
+    return false;
+  }
+  if (
+    (prev.kind === AbnfTokenKind.Asterisk ||
+      prev.kind === AbnfTokenKind.Integer) &&
+    (tok.kind === AbnfTokenKind.Rulename ||
+      tok.kind === AbnfTokenKind.String ||
+      tok.kind === AbnfTokenKind.CaseSensitiveString ||
+      tok.kind === AbnfTokenKind.CaseInsensitiveString ||
+      tok.kind === AbnfTokenKind.NumericValue ||
+      tok.kind === AbnfTokenKind.ProseValue ||
+      tok.kind === AbnfTokenKind.ParenOpen ||
+      tok.kind === AbnfTokenKind.BracketOpen)
+  ) {
+    return true;
+  }
+  if (
+    prev.kind === AbnfTokenKind.Integer &&
+    tok.kind === AbnfTokenKind.Asterisk
+  ) {
+    return true;
+  }
+  if (
+    prev.kind === AbnfTokenKind.Asterisk &&
+    tok.kind === AbnfTokenKind.Integer
+  ) {
+    return true;
+  }
+  return false;
 }
 
 function needsSpaceBetween(prev: AbnfToken, tok: AbnfToken): boolean {
-	if (
-		tok.kind === AbnfTokenKind.ParenClose ||
-		tok.kind === AbnfTokenKind.BracketClose
-	) {
-		return false;
-	}
-	if (
-		prev.kind === AbnfTokenKind.ParenOpen ||
-		prev.kind === AbnfTokenKind.BracketOpen
-	) {
-		return false;
-	}
-	if (prev.kind === AbnfTokenKind.Alternation) {
-		return true;
-	}
-	if (tok.kind === AbnfTokenKind.Alternation) {
-		return true;
-	}
-	if (isRepetitionPrefix(tok, prev)) {
-		return false;
-	}
-	return true;
+  if (
+    tok.kind === AbnfTokenKind.ParenClose ||
+    tok.kind === AbnfTokenKind.BracketClose
+  ) {
+    return false;
+  }
+  if (
+    prev.kind === AbnfTokenKind.ParenOpen ||
+    prev.kind === AbnfTokenKind.BracketOpen
+  ) {
+    return false;
+  }
+  if (prev.kind === AbnfTokenKind.Alternation) {
+    return true;
+  }
+  if (tok.kind === AbnfTokenKind.Alternation) {
+    return true;
+  }
+  if (isRepetitionPrefix(tok, prev)) {
+    return false;
+  }
+  return true;
 }
 
 function renderTokens(
-	tokens: TokenRender[],
-	config: AbnfFormatterConfig,
+  tokens: TokenRender[],
+  config: AbnfFormatterConfig,
 ): string {
-	let out = "";
-	let prev: AbnfToken | null = null;
+  let out = "";
+  let prev: AbnfToken | null = null;
 
-	for (const { tok, breakBefore } of tokens) {
-		if (!tok) {
-			continue;
-		}
+  for (const { tok, breakBefore } of tokens) {
+    if (!tok) {
+      continue;
+    }
 
-		if (tok.kind === AbnfTokenKind.Comment) {
-			const spaces = " ".repeat(
-				Math.max(0, Math.floor(config.spaceBeforeInlineComment)),
-			);
-			out += `${spaces}${tok.text}`;
-			break;
-		}
+    if (tok.kind === AbnfTokenKind.Comment) {
+      const spaces = " ".repeat(
+        Math.max(0, Math.floor(config.spaceBeforeInlineComment)),
+      );
+      out += `${spaces}${tok.text}`;
+      break;
+    }
 
-		if (prev && breakBefore) {
-			out += " ";
-		}
+    if (prev && breakBefore) {
+      out += " ";
+    }
 
-		out += tok.text;
-		prev = tok;
-	}
+    out += tok.text;
+    prev = tok;
+  }
 
-	return out;
+  return out;
 }
 
 function buildTokenRenders(tokens: AbnfToken[]): TokenRender[] {
-	const renders: TokenRender[] = [];
-	let prev: AbnfToken | null = null;
+  const renders: TokenRender[] = [];
+  let prev: AbnfToken | null = null;
 
-	for (const tok of tokens) {
-		if (tok.kind === AbnfTokenKind.Comment) {
-			renders.push({ tok, breakBefore: false });
-			prev = tok;
-			continue;
-		}
-		const breakBefore = prev ? needsSpaceBetween(prev, tok) : false;
-		renders.push({ tok, breakBefore });
-		prev = tok;
-	}
+  for (const tok of tokens) {
+    if (tok.kind === AbnfTokenKind.Comment) {
+      renders.push({ tok, breakBefore: false });
+      prev = tok;
+      continue;
+    }
+    const breakBefore = prev ? needsSpaceBetween(prev, tok) : false;
+    renders.push({ tok, breakBefore });
+    prev = tok;
+  }
 
-	return renders;
+  return renders;
 }
 
 function findLastBreakIndex(tokens: TokenRender[]): number | null {
-	for (let i = tokens.length - 1; i >= 1; i--) {
-		if (tokens[i]?.breakBefore) {
-			return i;
-		}
-	}
-	return null;
+  for (let i = tokens.length - 1; i >= 1; i--) {
+    if (tokens[i]?.breakBefore) {
+      return i;
+    }
+  }
+  return null;
 }
 
 function renderTokensWrapped(
-	tokens: AbnfToken[],
-	config: AbnfFormatterConfig,
-	firstPrefix: string,
-	wrapPrefix: string,
+  tokens: AbnfToken[],
+  config: AbnfFormatterConfig,
+  firstPrefix: string,
+  wrapPrefix: string,
 ): string[] {
-	const maxLen =
-		config.maxLineLength > 0 ? Math.floor(config.maxLineLength) : 0;
-	const renders = buildTokenRenders(tokens);
+  const maxLen =
+    config.maxLineLength > 0 ? Math.floor(config.maxLineLength) : 0;
+  const renders = buildTokenRenders(tokens);
 
-	if (maxLen <= 0) {
-		return [`${firstPrefix}${renderTokens(renders, config)}`];
-	}
+  if (maxLen <= 0) {
+    return [`${firstPrefix}${renderTokens(renders, config)}`];
+  }
 
-	const lines: string[] = [];
-	let currentTokens: TokenRender[] = [];
-	let currentPrefix = firstPrefix;
+  const lines: string[] = [];
+  let currentTokens: TokenRender[] = [];
+  let currentPrefix = firstPrefix;
 
-	for (const render of renders) {
-		currentTokens.push(render);
+  for (const render of renders) {
+    currentTokens.push(render);
 
-		while (true) {
-			const rendered = renderTokens(currentTokens, config);
-			if (currentPrefix.length + rendered.length <= maxLen) {
-				break;
-			}
+    while (true) {
+      const rendered = renderTokens(currentTokens, config);
+      if (currentPrefix.length + rendered.length <= maxLen) {
+        break;
+      }
 
-			const breakIndex = findLastBreakIndex(currentTokens);
-			if (breakIndex === null) {
-				break;
-			}
+      const breakIndex = findLastBreakIndex(currentTokens);
+      if (breakIndex === null) {
+        break;
+      }
 
-			const left = currentTokens.slice(0, breakIndex);
-			const right = currentTokens.slice(breakIndex);
+      const left = currentTokens.slice(0, breakIndex);
+      const right = currentTokens.slice(breakIndex);
 
-			if (left.length === 0) {
-				break;
-			}
+      if (left.length === 0) {
+        break;
+      }
 
-			lines.push(`${currentPrefix}${renderTokens(left, config)}`);
-			currentTokens = right;
-			currentPrefix = wrapPrefix;
-		}
-	}
+      lines.push(`${currentPrefix}${renderTokens(left, config)}`);
+      currentTokens = right;
+      currentPrefix = wrapPrefix;
+    }
+  }
 
-	if (currentTokens.length > 0) {
-		lines.push(`${currentPrefix}${renderTokens(currentTokens, config)}`);
-	}
+  if (currentTokens.length > 0) {
+    lines.push(`${currentPrefix}${renderTokens(currentTokens, config)}`);
+  }
 
-	return lines;
+  return lines;
 }

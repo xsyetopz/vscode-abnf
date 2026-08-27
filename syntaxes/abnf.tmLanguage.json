@@ -16,7 +16,7 @@
       "match": "^([a-zA-Z][a-zA-Z0-9-]*)(\\s*)(=\\/|=)",
       "captures": {
         "1": { "name": "entity.name.function.rule.abnf" },
-        "2": { },
+        "2": {},
         "3": {
           "patterns": [
             {
@@ -55,11 +55,11 @@
           "match": "(%[xX])([0-9a-fA-F]+)(?:(-)((?:[0-9a-fA-F]+))|(\\.)((?:[0-9a-fA-F]+(?:\\.[0-9a-fA-F]+)*)))?",
           "captures": {
             "1": { "name": "constant.numeric.prefix.abnf" },
-            "2": { },
+            "2": {},
             "3": { "name": "keyword.operator.range.abnf" },
-            "4": { },
+            "4": {},
             "5": { "name": "punctuation.separator.numeric.abnf" },
-            "6": { }
+            "6": {}
           }
         },
         {
@@ -67,9 +67,9 @@
           "match": "(%[dD])([0-9]+)(?:(-)([0-9]+)|(\\.)[0-9]+(?:\\.[0-9]+)*)?",
           "captures": {
             "1": { "name": "constant.numeric.prefix.abnf" },
-            "2": { },
+            "2": {},
             "3": { "name": "keyword.operator.range.abnf" },
-            "4": { },
+            "4": {},
             "5": { "name": "punctuation.separator.numeric.abnf" }
           }
         },
@@ -78,9 +78,9 @@
           "match": "(%[bB])([01]+)(?:(-)([01]+)|(\\.)[01]+(?:\\.[01]+)*)?",
           "captures": {
             "1": { "name": "constant.numeric.prefix.abnf" },
-            "2": { },
+            "2": {},
             "3": { "name": "keyword.operator.range.abnf" },
-            "4": { },
+            "4": {},
             "5": { "name": "punctuation.separator.numeric.abnf" }
           }
         }
@@ -103,16 +103,24 @@
     "string-plain": {
       "name": "string.quoted.double.abnf",
       "begin": "(\")",
-      "beginCaptures": { "1": { "name": "punctuation.definition.string.begin.abnf" } },
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.string.begin.abnf" }
+      },
       "end": "(\")|(?=\\n)",
-      "endCaptures": { "1": { "name": "punctuation.definition.string.end.abnf" } }
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.string.end.abnf" }
+      }
     },
     "prose-value": {
       "name": "string.other.prose-value.abnf",
       "begin": "(<)",
-      "beginCaptures": { "1": { "name": "punctuation.definition.prose-value.begin.abnf" } },
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.prose-value.begin.abnf" }
+      },
       "end": "(>)|(?=\\n)",
-      "endCaptures": { "1": { "name": "punctuation.definition.prose-value.end.abnf" } }
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.prose-value.end.abnf" }
+      }
     },
     "repetition-bounded": {
       "match": "(\\d+)(\\*)(\\d+)",

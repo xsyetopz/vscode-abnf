@@ -4,16 +4,7 @@
       "comment": ";"
     }
   },
-  "brackets": [
-    [
-      "(",
-      ")"
-    ],
-    [
-      "[",
-      "]"
-    ]
-  ],
+  "brackets": [["(", ")"], ["[", "]"]],
   "autoClosingPairs": [
     {
       "open": "(",
@@ -32,24 +23,7 @@
       "close": ">"
     }
   ],
-  "surroundingPairs": [
-    [
-      "(",
-      ")"
-    ],
-    [
-      "[",
-      "]"
-    ],
-    [
-      "\"",
-      "\""
-    ],
-    [
-      "<",
-      ">"
-    ]
-  ],
+  "surroundingPairs": [["(", ")"], ["[", "]"], ["\"", "\""], ["<", ">"]],
   "wordPattern": "[a-zA-Z][a-zA-Z0-9-]*",
   "indentationRules": {
     "increaseIndentPattern": "^[a-zA-Z][a-zA-Z0-9-]*\\s*=\\/?",
