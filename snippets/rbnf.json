@@ -1,31 +1,22 @@
 {
   "RBNF rule": {
     "prefix": "rule",
-    "body": [
-      "<${1:rule name}> ::= ${2:expression}"
-    ],
+    "body": ["<${1:rule name}> ::= ${2:expression}"],
     "description": "Insert an RBNF rule with an angle-bracket name."
   },
   "RBNF alternative": {
     "prefix": "alt",
-    "body": [
-      "<${1:rule name}> ::= ${2:first}",
-      "    | ${3:second}"
-    ],
+    "body": ["<${1:rule name}> ::= ${2:first}", "    | ${3:second}"],
     "description": "Insert an RBNF rule with two alternatives."
   },
   "Zero or more": {
     "prefix": "rep",
-    "body": [
-      "*(${1:element})"
-    ],
+    "body": ["*(${1:element})"],
     "description": "Insert an RBNF zero-or-more repetition."
   },
   "One or more": {
     "prefix": "rep1",
-    "body": [
-      "1*(${1:element})"
-    ],
+    "body": ["1*(${1:element})"],
     "description": "Insert an RBNF one-or-more repetition."
   }
 }

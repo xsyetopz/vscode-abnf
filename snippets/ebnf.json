@@ -1,31 +1,22 @@
 {
   "W3C production": {
     "prefix": "rule",
-    "body": [
-      "[${1:1}] ${2:name} ::= ${3:expression}"
-    ],
+    "body": ["[${1:1}] ${2:name} ::= ${3:expression}"],
     "description": "Insert a W3C XML EBNF production with a number."
   },
   "Character code": {
     "prefix": "hex",
-    "body": [
-      "#x${1:20}"
-    ],
+    "body": ["#x${1:20}"],
     "description": "Insert a W3C XML EBNF hexadecimal character code."
   },
   "Character range": {
     "prefix": "range",
-    "body": [
-      "[#x${1:20}-#x${2:7E}]"
-    ],
+    "body": ["[#x${1:20}-#x${2:7E}]"],
     "description": "Insert a W3C XML EBNF character range."
   },
   "Alternatives": {
     "prefix": "alt",
-    "body": [
-      "${1:name} ::= ${2:first}",
-      "    | ${3:second}"
-    ],
+    "body": ["${1:name} ::= ${2:first}", "    | ${3:second}"],
     "description": "Insert a W3C XML EBNF production with two alternatives."
   }
 }
