@@ -11,13 +11,9 @@
     "comment": {
       "name": "comment.block.ebnf",
       "begin": "(/\\*)",
-      "beginCaptures": {
-        "1": { "name": "punctuation.definition.comment.begin.ebnf" }
-      },
+      "beginCaptures": { "1": { "name": "punctuation.definition.comment.begin.ebnf" } },
       "end": "(\\*/)",
-      "endCaptures": {
-        "1": { "name": "punctuation.definition.comment.end.ebnf" }
-      }
+      "endCaptures": { "1": { "name": "punctuation.definition.comment.end.ebnf" } }
     },
     "rule-definition": {
       "match": "^\\s*(\\[[^\\]\\r\\n]+\\])?\\s*([A-Za-z_][A-Za-z0-9_.:-]*)(\\s*)(::=)",
@@ -51,24 +47,16 @@
     "double-string": {
       "name": "string.quoted.double.ebnf",
       "begin": "(\\\")",
-      "beginCaptures": {
-        "1": { "name": "punctuation.definition.string.begin.ebnf" }
-      },
+      "beginCaptures": { "1": { "name": "punctuation.definition.string.begin.ebnf" } },
       "end": "(\\\")|(?=\\n)",
-      "endCaptures": {
-        "1": { "name": "punctuation.definition.string.end.ebnf" }
-      }
+      "endCaptures": { "1": { "name": "punctuation.definition.string.end.ebnf" } }
     },
     "single-string": {
       "name": "string.quoted.single.ebnf",
       "begin": "(')",
-      "beginCaptures": {
-        "1": { "name": "punctuation.definition.string.begin.ebnf" }
-      },
+      "beginCaptures": { "1": { "name": "punctuation.definition.string.begin.ebnf" } },
       "end": "(')|(?=\\n)",
-      "endCaptures": {
-        "1": { "name": "punctuation.definition.string.end.ebnf" }
-      }
+      "endCaptures": { "1": { "name": "punctuation.definition.string.end.ebnf" } }
     },
     "alternation": {
       "name": "keyword.operator.alternation.ebnf",

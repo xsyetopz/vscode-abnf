@@ -43,24 +43,16 @@
     "double-string": {
       "name": "string.quoted.double.bnf",
       "begin": "(\\\")",
-      "beginCaptures": {
-        "1": { "name": "punctuation.definition.string.begin.bnf" }
-      },
+      "beginCaptures": { "1": { "name": "punctuation.definition.string.begin.bnf" } },
       "end": "(\\\")|(?=\\n)",
-      "endCaptures": {
-        "1": { "name": "punctuation.definition.string.end.bnf" }
-      }
+      "endCaptures": { "1": { "name": "punctuation.definition.string.end.bnf" } }
     },
     "single-string": {
       "name": "string.quoted.single.bnf",
       "begin": "(')",
-      "beginCaptures": {
-        "1": { "name": "punctuation.definition.string.begin.bnf" }
-      },
+      "beginCaptures": { "1": { "name": "punctuation.definition.string.begin.bnf" } },
       "end": "(')|(?=\\n)",
-      "endCaptures": {
-        "1": { "name": "punctuation.definition.string.end.bnf" }
-      }
+      "endCaptures": { "1": { "name": "punctuation.definition.string.end.bnf" } }
     },
     "alternation": {
       "name": "keyword.operator.alternation.bnf",

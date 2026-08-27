@@ -12,7 +12,8 @@
       "!!**/node_modules",
       "!!**/dist",
       "!!**/coverage",
-      "!!**/*.generated.{js,jsx,mjs,cjs,ts,tsx,mts,cts}"
+      "!!**/*.generated.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
+      "!!syntaxes/**/*.tmLanguage.json"
     ],
     "ignoreUnknown": true
   },
