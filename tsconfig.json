@@ -8,9 +8,7 @@
     "checkJs": true,
     "composite": true,
     "exactOptionalPropertyTypes": true,
-    "lib": [
-      "ES2022"
-    ],
+    "lib": ["ES2022"],
     "module": "commonjs",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
@@ -27,17 +25,9 @@
     "rootDir": "client/src",
     "sourceMap": true,
     "strict": true,
-    "target": "ES2022",
+    "target": "es2022",
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
-    "types": [
-      "bun",
-      "node",
-      "vscode"
-    ],
+    "types": ["bun", "node", "vscode"]
   },
-  "exclude": [
-    "node_modules",
-    ".vscode-test",
-    "dist"
-  ]
+  "exclude": ["node_modules", ".vscode-test", "dist"]
 }
