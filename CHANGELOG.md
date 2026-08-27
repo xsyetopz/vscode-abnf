@@ -2,6 +2,12 @@
 
 User-facing changes go in this file.
 
+## [0.2.1] - 2026-08-27
+
+### Fixed
+
+- Comment text no longer receives grammar operator or delimiter highlighting.
+
 ## [0.1.0] - 2026-04-23
 
 BNF-family reset release.

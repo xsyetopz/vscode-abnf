@@ -10,9 +10,7 @@
   "repository": {
     "comment": {
       "name": "comment.line.semicolon.rbnf",
-      "begin": "(;)",
-      "beginCaptures": { "1": { "name": "punctuation.definition.comment.rbnf" } },
-      "end": "(?=\\n)"
+      "match": ";[^\\r\\n]*"
     },
     "rule-definition": {
       "match": "^\\s*(<[^<>\\r\\n]+>|[A-Za-z_][A-Za-z0-9_.:-]*)(\\s*)(::=)",

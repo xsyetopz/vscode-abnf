@@ -5,6 +5,13 @@ import {
 	getSyntaxHover,
 } from "../../grammar/syntax-details.ts";
 
+function hoverValue(hover: unknown): string {
+	if (!hover) {
+		throw new Error("Expected syntax hover result");
+	}
+	return ((hover as { contents: unknown }).contents as { value: string }).value;
+}
+
 describe("grammar syntax details", () => {
 	test("describes ABNF numeric terminals and repetitions", () => {
 		const numericHover = getSyntaxHover(
@@ -20,24 +27,16 @@ describe("grammar syntax details", () => {
 			"abnf",
 		);
 
-		expect(
-			(numericHover?.contents as unknown as { value: string }).value,
-		).toContain("hexadecimal range");
-		expect(
-			(repeatHover?.contents as unknown as { value: string }).value,
-		).toContain("bounded repetition");
+		expect(hoverValue(numericHover)).toContain("hexadecimal range");
+		expect(hoverValue(repeatHover)).toContain("bounded repetition");
 	});
 
 	test("describes EBNF suffix and character syntax", () => {
 		const suffixHover = getSyntaxHover("item ::= name+", 0, 13, "ebnf");
 		const charHover = getSyntaxHover("char ::= [#x20-#x21]", 0, 10, "ebnf");
 
-		expect(
-			(suffixHover?.contents as unknown as { value: string }).value,
-		).toContain("One-or-more suffix");
-		expect(
-			(charHover?.contents as unknown as { value: string }).value,
-		).toContain("character class");
+		expect(hoverValue(suffixHover)).toContain("One-or-more suffix");
+		expect(hoverValue(charHover)).toContain("character class");
 	});
 
 	test("emits sparse syntax-detail inlays", () => {
@@ -58,14 +57,8 @@ describe("grammar syntax details", () => {
 		const ebnfHover = getSyntaxHover("rule ::= {name}", 0, 9, "ebnf");
 		const rbnfHover = getSyntaxHover("<rule> ::= [name]", 0, 11, "rbnf");
 
-		expect(
-			(bnfHover?.contents as unknown as { value: string }).value,
-		).toContain("group delimiter");
-		expect(
-			(ebnfHover?.contents as unknown as { value: string }).value,
-		).toContain("group delimiter");
-		expect(
-			(rbnfHover?.contents as unknown as { value: string }).value,
-		).toContain("group delimiter");
+		expect(hoverValue(bnfHover)).toContain("group delimiter");
+		expect(hoverValue(ebnfHover)).toContain("group delimiter");
+		expect(hoverValue(rbnfHover)).toContain("group delimiter");
 	});
 });

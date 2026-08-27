@@ -10,6 +10,13 @@ import {
 let GrammarCompletionProvider: typeof import("../../grammar/completion.ts").GrammarCompletionProvider;
 let GrammarHoverProvider: typeof import("../../grammar/providers/hover.ts").GrammarHoverProvider;
 
+function hoverValue(hover: unknown): string {
+	if (!hover) {
+		throw new Error("Expected hover result");
+	}
+	return ((hover as { contents: unknown }).contents as { value: string }).value;
+}
+
 beforeAll(async () => {
 	await loadGrammarTestCore();
 	({ GrammarCompletionProvider } = await import("../../grammar/completion.ts"));
@@ -42,13 +49,11 @@ describe("grammar completion and hover providers", () => {
 			"(workspace)",
 		);
 		expect(items.some((item) => item.label === "production")).toBe(true);
-		expect(
-			(
-				items.find((item) => item.label === "character range")?.insertText as {
-					value: string;
-				}
-			).value,
-		).toContain("#x");
+		const characterRange = items.find((item) => item.label === "character range");
+		if (!characterRange) {
+			throw new Error("Expected character range completion");
+		}
+		expect((characterRange.insertText as { value: string }).value).toContain("#x");
 	});
 
 	test("shows EBNF character hover and workspace fallback hovers", () => {
@@ -71,9 +76,7 @@ describe("grammar completion and hover providers", () => {
 			{} as never,
 		);
 
-		expect(
-			(charHover?.contents as unknown as { value: string }).value,
-		).toContain("not a rule reference");
+		expect(hoverValue(charHover)).toContain("not a rule reference");
 
 		const refDoc = createDocument(
 			"/workspace/root.ebnf",
@@ -86,9 +89,7 @@ describe("grammar completion and hover providers", () => {
 			{} as never,
 		);
 
-		expect(
-			(ruleHover?.contents as unknown as { value: string }).value,
-		).toContain("shared ::= #x20");
+		expect(hoverValue(ruleHover)).toContain("shared ::= #x20");
 	});
 
 	test("shows built-in ABNF core-rule hover with workspace reference count", () => {
@@ -110,7 +111,7 @@ describe("grammar completion and hover providers", () => {
 			new PositionMock(0, 8) as never,
 			{} as never,
 		);
-		const text = (hover?.contents as unknown as { value: string }).value;
+		const text = hoverValue(hover);
 
 		expect(text).toContain("Built-in ABNF core rule from RFC 5234 Appendix B.");
 		expect(text).toContain("References: 2");
@@ -130,7 +131,7 @@ describe("grammar completion and hover providers", () => {
 			new PositionMock(0, 8) as never,
 			{} as never,
 		);
-		const text = (hover?.contents as unknown as { value: string }).value;
+		const text = hoverValue(hover);
 
 		expect(text).toContain('ALPHA = "x"');
 		expect(text).not.toContain("Built-in ABNF core rule.");

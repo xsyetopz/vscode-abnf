@@ -37,8 +37,12 @@ const BARE_RE = /\b[A-Za-z_][A-Za-z0-9_.:-]*\b/g;
 const LITERAL_RE = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
 const EBNF_CHAR_CLASS_RE = /\[(?:\^)?[^\]\r\n]*\]/g;
 const EBNF_CHAR_CODE_RE = /#x[0-9A-Fa-f]+/g;
-const EBNF_BLOCK_COMMENT_RE = /\/\*.*?\*\//g;
 const LINE_SPLIT_RE = /\r\n|\n|\r/;
+
+interface CommentRange {
+	start: number;
+	end: number;
+}
 
 /**
  * Tokenizes a document according to its grammar dialect.
@@ -99,30 +103,112 @@ function tokenizeProductionGrammar(
 	text: string,
 	dialect: Exclude<GrammarDialect, "abnf">,
 ): GrammarToken[] {
-	return text
-		.split(LINE_SPLIT_RE)
+	const lines = text.split(LINE_SPLIT_RE);
+	const lineStarts = lineStartOffsets(text, lines);
+	const comments = productionCommentRanges(text, dialect);
+	return lines
 		.flatMap((line, lineNumber) =>
-			tokenizeProductionLine(line, lineNumber, dialect),
+			tokenizeProductionLine(
+				line,
+				lineNumber,
+				dialect,
+				lineStarts[lineNumber] ?? 0,
+				comments,
+			),
 		)
 		.sort((a, b) => a.line - b.line || a.column - b.column);
+}
+
+function lineStartOffsets(text: string, lines: string[]): number[] {
+	const starts: number[] = [];
+	let offset = 0;
+	for (const line of lines) {
+		starts.push(offset);
+		offset += line.length;
+		if (text.startsWith("\r\n", offset)) {
+			offset += 2;
+		} else if (text[offset] === "\r" || text[offset] === "\n") {
+			offset++;
+		}
+	}
+	return starts;
+}
+
+function productionCommentRanges(
+	text: string,
+	dialect: Exclude<GrammarDialect, "abnf">,
+): CommentRange[] {
+	const ranges: CommentRange[] = [];
+	let quote: string | undefined;
+	let i = 0;
+	while (i < text.length) {
+		const ch = text[i];
+		if (quote) {
+			if (ch === "\r" || ch === "\n") {
+				quote = undefined;
+				i++;
+				continue;
+			}
+			if (ch === "\\") {
+				i++;
+				if (text[i] !== "\r" && text[i] !== "\n") {
+					i++;
+				}
+			} else {
+				if (ch === quote) {
+					quote = undefined;
+				}
+				i++;
+			}
+			continue;
+		}
+		if (ch === '"' || ch === "'") {
+			quote = ch;
+			i++;
+			continue;
+		}
+		if (dialect === "ebnf" && ch === "/" && text[i + 1] === "*") {
+			const start = i;
+			const close = text.indexOf("*/", i + 2);
+			const end = close < 0 ? text.length : close + 2;
+			ranges.push({ start, end });
+			i = end;
+			continue;
+		}
+		if (dialect !== "ebnf" && ch === ";") {
+			const start = i;
+			i++;
+			while (i < text.length && text[i] !== "\r" && text[i] !== "\n") {
+				i++;
+			}
+			ranges.push({ start, end: i });
+			continue;
+		}
+		i++;
+	}
+	return ranges;
 }
 
 function tokenizeProductionLine(
 	line: string,
 	lineNumber: number,
 	dialect: Exclude<GrammarDialect, "abnf">,
+	lineStart: number,
+	comments: readonly CommentRange[],
 ): GrammarToken[] {
-	const production = line.match(PRODUCTION_RE);
-	const referenceLine = maskReferenceExclusions(line, dialect);
+	const commentLine = maskCommentRanges(line, lineStart, comments);
+	const production = commentLine.match(PRODUCTION_RE);
+	const literalLine = commentLine.replace(LITERAL_RE, maskMatch);
+	const referenceLine = maskReferenceExclusions(literalLine, dialect);
 	return [
-		...commentTokens(line, lineNumber, dialect),
-		...productionNumberTokens(line, lineNumber, dialect),
+		...commentTokens(line, lineNumber, lineStart, comments),
+		...productionNumberTokens(commentLine, lineNumber, dialect),
 		...productionTokens(line, lineNumber, production),
-		...literalTokens(line, lineNumber),
-		...ebnfCharacterTokens(line, lineNumber, dialect),
+		...literalTokens(commentLine, lineNumber),
+		...ebnfCharacterTokens(commentLine, lineNumber, dialect),
 		...angleReferenceTokens(referenceLine, lineNumber, production),
 		...bareReferenceTokens(referenceLine, lineNumber, dialect, production),
-		...operatorTokens(line, lineNumber),
+		...operatorTokens(literalLine, lineNumber),
 	];
 }
 
@@ -130,20 +216,11 @@ function maskMatch(match: string): string {
 	return " ".repeat(match.length);
 }
 
-function maskSemicolonComment(line: string): string {
-	const semicolon = line.indexOf(";");
-	return semicolon < 0
-		? line
-		: `${line.slice(0, semicolon)}${" ".repeat(line.length - semicolon)}`;
-}
-
 function maskReferenceExclusions(
 	line: string,
 	dialect: Exclude<GrammarDialect, "abnf">,
 ): string {
-	let out = maskSemicolonComment(line)
-		.replace(LITERAL_RE, maskMatch)
-		.replace(EBNF_BLOCK_COMMENT_RE, maskMatch);
+	let out = line.replace(LITERAL_RE, maskMatch);
 	if (dialect === "ebnf") {
 		out = out
 			.replace(EBNF_CHAR_CLASS_RE, maskMatch)
@@ -155,29 +232,38 @@ function maskReferenceExclusions(
 function commentTokens(
 	line: string,
 	lineNumber: number,
-	dialect: Exclude<GrammarDialect, "abnf">,
+	lineStart: number,
+	comments: readonly CommentRange[],
 ): GrammarToken[] {
-	const tokens: GrammarToken[] = [];
-	const semicolon = line.indexOf(";");
-	if (semicolon >= 0) {
-		tokens.push({
-			kind: "comment",
-			text: line.slice(semicolon),
-			line: lineNumber,
-			column: semicolon,
-		});
-	}
-	if (dialect === "ebnf") {
-		for (const match of line.matchAll(EBNF_BLOCK_COMMENT_RE)) {
-			tokens.push({
-				kind: "comment",
-				text: match[0] ?? "",
-				line: lineNumber,
-				column: match.index ?? 0,
-			});
+	const lineEnd = lineStart + line.length;
+	return comments.flatMap((comment) => {
+		const start = Math.max(comment.start, lineStart);
+		const end = Math.min(comment.end, lineEnd);
+		return start < end
+			? [{
+					kind: "comment" as const,
+					text: line.slice(start - lineStart, end - lineStart),
+					line: lineNumber,
+					column: start - lineStart,
+				}]
+			: [];
+	});
+}
+
+function maskCommentRanges(
+	line: string,
+	lineStart: number,
+	comments: readonly CommentRange[],
+): string {
+	const masked = line.split("");
+	for (const comment of comments) {
+		const start = Math.max(comment.start - lineStart, 0);
+		const end = Math.min(comment.end - lineStart, line.length);
+		for (let i = start; i < end; i++) {
+			masked[i] = " ";
 		}
 	}
-	return tokens;
+	return masked.join("");
 }
 
 function productionNumberTokens(
