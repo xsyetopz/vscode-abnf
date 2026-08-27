@@ -21,8 +21,7 @@ bun run build
 bun run package
 ```
 
-`bun run biome:check` edits files because the script passes `--write --unsafe`.
-Run the command only when formatter and lint edits are allowed.
+`bun run biome:check` checks formatting and lint without modifying files.
 
 ## Code Boundaries
 

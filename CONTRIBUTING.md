@@ -43,7 +43,7 @@ The build writes the extension bundle to `dist/extension.js`.
 This project uses [Biome](https://biomejs.dev) for code quality:
 
 ```bash
-bun run biome:check   # Check and auto-fix code style
+bun run biome:check   # Check code style without modifying files
 bun run biome:format  # Auto-fix formatting only
 bun run biome:lint    # Auto-fix lint findings only
 ```
